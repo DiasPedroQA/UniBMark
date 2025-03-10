@@ -16,19 +16,28 @@ jobs:
       - name: 📥 Checkout do código
         uses: actions/checkout@v3
 
-      - name: 🐍 Configurar Python
+      - name: 🐍 Configurar Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
       - name: 📦 Instalar dependências
         run: |
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: 📋 Linting com flake8
+        run: |
+          # Para parar a execução em caso de erro de sintaxe ou nomes indefinidos
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Considera erros como avisos e limita a complexidade e o tamanho das linhas
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: 🧪 Executar Testes
         id: test_step
         run: |
-          python main.py | tee test_output.log
+          pytest | tee test_output.log
 
       - name: 📤 Criar Issue no GitHub em caso de erro
         if: failure()
