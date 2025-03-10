@@ -1,3 +1,17 @@
+"""
+Módulo de configuração para carregar variáveis de ambiente
+relacionadas à integração com o JIRA.
+
+Este módulo utiliza o pacote `dotenv` para carregar
+variáveis de ambiente de um arquivo `.env`, se ele existir.
+As seguintes variáveis de ambiente são esperadas:
+- JIRA_URL: A URL da instância do JIRA.
+- JIRA_USER: O nome de usuário para autenticação no JIRA.
+- JIRA_API_TOKEN: O token de API para autenticação no JIRA.
+- JIRA_PROJECT_KEY: A chave do projeto JIRA para interagir.
+"""
+
+
 import os
 from dotenv import load_dotenv
 
