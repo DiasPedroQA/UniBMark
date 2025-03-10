@@ -46,9 +46,8 @@ def executar_calculo() -> tuple[float, bool]:
     if random.choice([True, False]):
         resultado: float = num1 + num2 if operacao == "soma" else num1 * num2
         return resultado, True  # Sucesso no cálculo
-    else:
-        # Simula um erro de cálculo aleatório
-        return 0.0, False  # Falha no cálculo
+    # Simula um erro de cálculo aleatório
+    return 0.0, False  # Falha no cálculo
 
 
 # Fixando a semente para garantir resultados previsíveis nos testes
