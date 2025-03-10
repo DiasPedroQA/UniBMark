@@ -1,0 +1,39 @@
+name: Automação de Testes e Relatório de Bugs no Jira
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Instalar dependências
+        run: |
+          pip install -r requirements.txt
+
+      - name: 🧪 Executar Testes
+        id: test_step
+        run: |
+          python main.py | tee test_output.log
+
+      - name: 📤 Criar Issue no GitHub em caso de erro
+        if: failure()
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/ISSUE_TEMPLATE/bug_report.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
