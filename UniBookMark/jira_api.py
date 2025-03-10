@@ -49,4 +49,5 @@ class JiraClient:
             print(f"✅ Ticket criado com sucesso: {response.json()['key']}")
         else:
             print(
-                f"❌ Erro ao criar ticket: {response.status_code} - {response.text}")
+                f"❌ Erro ao criar ticket: {response.status_code} - "
+                f"{response.text}")
