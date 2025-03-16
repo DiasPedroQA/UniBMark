@@ -21,9 +21,9 @@ jobs:
 
       - name: Verificar estrutura de diretórios
         run: |
-          pwd   # Exibe o diretório atual
-          ls -l # Lista os arquivos no diretório atual
-          ls -l UniBookMark  # Verifica se o diretório UniBookMark existe
+          pwd
+          ls -l
+          ls -l UniBookMark
 
   setup-python:
     name: Configurar Python
@@ -44,15 +44,16 @@ jobs:
     steps:
       - name: Verificar estrutura de diretórios após o checkout
         run: |
-          pwd   # Exibe o diretório atual
-          ls -l # Lista os arquivos no diretório atual
-          ls -l UniBookMark  # Verifica se o diretório UniBookMark existe
+          pwd
+          mkdir -p UniBookMark
+          ls -l
+          ls -l UniBookMark
 
       - name: Instalar dependências
         run: |
-          cd UniBookMark || exit 1   # Garante que estamos no diretório correto onde requirements.txt está localizado
+          cd UniBookMark || exit 1
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Certifique-se de que o arquivo esteja no diretório UniBookMark
+          pip install -r requirements.txt
           pip install pytest flake8 black
 
   lint:
