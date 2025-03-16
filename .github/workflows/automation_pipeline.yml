@@ -21,8 +21,8 @@ jobs:
 
       - name: Verificar estrutura de diretórios
         run: |
-          pwd
-          ls -l
+          pwd   # Exibe o diretório atual
+          ls -l # Lista os arquivos no diretório atual
 
   setup-python:
     name: Configurar Python
@@ -43,16 +43,16 @@ jobs:
     steps:
       - name: Verificar estrutura de diretórios após o checkout
         run: |
-          pwd
-          ls -l
-          ls -l UniBookMark
+          pwd   # Exibe o diretório atual
+          ls -l # Lista os arquivos no diretório atual
+          ls -l UniBMark  # Verifica se o diretório UniBMark existe
 
       - name: Instalar dependências
         run: |
-
-          cd UniBookMark || exit 1
+          # Agora o diretório correto será UniBMark, pois o repositório foi baixado com esse nome
+          cd UniBMark || exit 1   # Garante que estamos no diretório correto
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt  # Certifique-se de que o arquivo esteja no diretório UniBMark
           pip install pytest flake8 black
 
   lint:
