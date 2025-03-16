@@ -183,7 +183,7 @@ Quer contribuir com esse projeto? Fique à vontade! Siga estas etapas:
 1. **Fork o repositório** e clone para seu ambiente local:
 
    ```bash
-   git clone https://github.com/seu-usuario/nome-do-projeto.git
+   git clone https://github.com/DiasPedroQA/UniBMark
    ```
 
 2. **Crie uma branch para sua funcionalidade ou correção:**
