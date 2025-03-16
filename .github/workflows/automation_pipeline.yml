@@ -19,6 +19,11 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Verificar estrutura de diretórios
+        run: |
+          pwd
+          ls -l
+
   setup-python:
     name: Configurar Python
     runs-on: ubuntu-latest
@@ -36,14 +41,16 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Verificar os arquivos no diretório
+      - name: Verificar estrutura de diretórios após o checkout
         run: |
           pwd
           ls -l
+          ls -l UniBookMark
 
       - name: Instalar dependências
         run: |
-          cd UniBookMark
+
+          cd UniBookMark || exit 1
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest flake8 black
