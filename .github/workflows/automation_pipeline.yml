@@ -52,6 +52,7 @@ jobs:
       - name: Instalar dependências
         run: |
           cd UniBookMark || exit 1
+          pip freeze > requirements.txt
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest flake8 black
