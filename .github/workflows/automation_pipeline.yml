@@ -38,14 +38,14 @@ jobs:
     steps:
       - name: Verificar os arquivos no diretório
         run: |
-          pwd   # Exibe o diretório atual
-          ls -l # Lista os arquivos no diretório atual para verificar se o requirements.txt está presente
+          pwd
+          ls -l
 
       - name: Instalar dependências
         run: |
-          cd UniBookMark   # Navega para o diretório correto onde o requirements.txt está localizado
+          cd UniBookMark
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Garante que estamos referenciando corretamente o arquivo na raiz do diretório UniBookMark
+          pip install -r requirements.txt
           pip install pytest flake8 black
 
   lint:
