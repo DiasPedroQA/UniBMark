@@ -11,58 +11,76 @@ on:
       - develop
 
 jobs:
-  test-and-lint:
-    name: Testes e Análises
+  checkout:
+    name: Checkout do código
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+  setup-python:
+    name: Configurar Python
+    runs-on: ubuntu-latest
+    needs: checkout
+
+    steps:
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
+  install-dependencies:
+    name: Instalar dependências
+    runs-on: ubuntu-latest
+    needs: setup-python
+
+    steps:
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest flake8 black
 
+  lint:
+    name: Verificar linting com Flake8
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+
+    steps:
       - name: Verificar linting com Flake8
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
 
+  format:
+    name: Formatação de código com Black
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+
+    steps:
       - name: Formatação de código com Black
         run: |
           black --check .
 
+  test:
+    name: Executar testes com Pytest
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+
+    steps:
       - name: Executar testes com Pytest
         run: |
           pytest --junitxml=report.xml
 
+  publish-report:
+    name: Publicar Relatórios de Testes
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
       - name: Publicar Relatórios de Testes
         uses: actions/upload-artifact@v3
         with:
           name: pytest-report
           path: report.xml
-
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: test-and-lint
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Instalar dependências
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
