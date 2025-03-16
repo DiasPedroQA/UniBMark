@@ -14,7 +14,7 @@ Funções:
 
 
 import requests
-from config import JIRA_URL, JIRA_USER, JIRA_API_TOKEN, JIRA_PROJECT_KEY
+from config import JIRA_API_TOKEN, JIRA_PROJECT_KEY, JIRA_URL, JIRA_USER
 
 
 class JiraClient:
