@@ -38,11 +38,13 @@ jobs:
     steps:
       - name: Verificar os arquivos no diretório
         run: |
-          ls -l
+          pwd   # Exibe o diretório atual
+          ls -l # Lista os arquivos no diretório atual para verificar se o requirements.txt está presente
+
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt  # Garante que estamos referenciando corretamente o arquivo na raiz
           pip install pytest flake8 black
 
   lint:
