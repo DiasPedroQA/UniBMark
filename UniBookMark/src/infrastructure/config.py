@@ -13,6 +13,7 @@ As seguintes variáveis de ambiente são esperadas:
 
 
 import os
+
 from dotenv import load_dotenv
 
 # Carregar variáveis do .env (se existirem)
