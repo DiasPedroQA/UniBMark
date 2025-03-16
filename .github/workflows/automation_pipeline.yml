@@ -23,6 +23,7 @@ jobs:
         run: |
           pwd   # Exibe o diretório atual
           ls -l # Lista os arquivos no diretório atual
+          ls -l UniBookMark  # Verifica se o diretório UniBookMark existe
 
   setup-python:
     name: Configurar Python
@@ -45,14 +46,13 @@ jobs:
         run: |
           pwd   # Exibe o diretório atual
           ls -l # Lista os arquivos no diretório atual
-          ls -l UniBMark  # Verifica se o diretório UniBMark existe
+          ls -l UniBookMark  # Verifica se o diretório UniBookMark existe
 
       - name: Instalar dependências
         run: |
-          # Agora o diretório correto será UniBMark, pois o repositório foi baixado com esse nome
-          cd UniBMark || exit 1   # Garante que estamos no diretório correto
+          cd UniBookMark || exit 1   # Garante que estamos no diretório correto onde requirements.txt está localizado
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Certifique-se de que o arquivo esteja no diretório UniBMark
+          pip install -r requirements.txt  # Certifique-se de que o arquivo esteja no diretório UniBookMark
           pip install pytest flake8 black
 
   lint:
