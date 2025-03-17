@@ -1,40 +1,103 @@
 {
+  // Configurações do Python
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.stubPath": "${workspaceFolder}/typings",
+
+  // Configurações do Editor
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": "always"
   },
-  "python.analysis.typeCheckingMode": "basic",
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
+  "editor.multiCursorModifier": "ctrlCmd",
+  "editor.formatOnPaste": true,
+  "editor.wordWrap": "bounded",
+  "editor.trimAutoWhitespace": true,
+  "editor.fontFamily": "Fira Code",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.smoothScrolling": true,
+  "editor.cursorBlinking": "phase",
+  "editor.bracketPairColorization.enabled": true,
+
+  // Configurações de Arquivos
+  "files.autoSave": "onFocusChange",
   "files.exclude": {
     "**/.git": true,
     "**/.venv": true,
     "**/.mypy_cache": true,
     "**/.pytest_cache": true,
-    "**/__pycache__": true
+    "**/__pycache__": true,
+    "**/node_modules": true
   },
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/node_modules/**": true
+  },
+  "files.trimTrailingWhitespace": true,
+
+  // Configurações de Testes
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+  // Configurações do Git
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.allowForcePush": false,
+  "git.enableCommitSigning": true,
+
+  // Configurações do Terminal
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.cursorStyle": "underline",
+  "terminal.integrated.defaultProfile.linux": "bash",
+
+  // Outras Configurações
+  "diffEditor.ignoreTrimWhitespace": false,
+  "workbench.sideBar.location": "left",
+  "explorer.confirmDelete": false,
   "cSpell.words": [
     "beautifulsoup",
     "celerybeat",
+    "certifi",
     "cython",
     "descricao",
     "dmypy",
     "dont",
     "dotenv",
+    "exceptiongroup",
+    "idna",
+    "iniconfig",
     "junitxml",
+    "mccabe",
     "mkdocs",
     "multiplicacao",
     "mypy",
     "operacao",
+    "pluggy",
+    "pycodestyle",
+    "pyflakes",
     "pypackages",
     "pypirc",
     "pytype",
     "ropeproject",
+    "soupsieve",
     "Spyder",
     "spyderproject",
     "spyproject",
+    "tomli",
+    "urllib",
     "venv"
   ]
 }
