@@ -23,7 +23,6 @@ jobs:
         run: |
           pwd
           ls -l
-          ls -l UniBookMark
 
   setup-python:
     name: Configurar Python
@@ -36,23 +35,8 @@ jobs:
         with:
           python-version: '3.10'
 
-  install-dependencies:
-    name: Instalar dependências
-    runs-on: ubuntu-latest
-    needs: setup-python
-
-    steps:
-      - name: Verificar estrutura de diretórios após o checkout
-        run: |
-          pwd
-          mkdir -p UniBookMark
-          ls -l
-          ls -l UniBookMark
-
       - name: Instalar dependências
         run: |
-          cd UniBookMark || exit 1
-          pip freeze > requirements.txt
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest flake8 black
@@ -60,32 +44,32 @@ jobs:
   lint:
     name: Verificar linting com Flake8
     runs-on: ubuntu-latest
-    needs: install-dependencies
+    needs: setup-python
 
     steps:
       - name: Verificar linting com Flake8
         run: |
-          flake8 UniBookMark .
+          flake8 .
 
   format:
-    name: Formatação de código com Black
+    name: Verificar formatação com Black
     runs-on: ubuntu-latest
-    needs: install-dependencies
+    needs: setup-python
 
     steps:
-      - name: Formatação de código com Black
+      - name: Verificar formatação com Black
         run: |
-          black --check UniBookMark .
+          black --check .
 
   test:
     name: Executar testes com Pytest
     runs-on: ubuntu-latest
-    needs: install-dependencies
+    needs: setup-python
 
     steps:
       - name: Executar testes com Pytest
         run: |
-          pytest --junitxml=report.xml
+          pytest tests/ --junitxml=report.xml
 
   publish-report:
     name: Publicar Relatórios de Testes
