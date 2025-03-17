@@ -41,9 +41,15 @@ jobs:
           source .venv/bin/activate
           echo "VIRTUAL ENV ATIVADA"
 
+      - name: Verificar se requirements.txt existe
+        run: |
+          ls -l
+          test -f requirements.txt && echo "Arquivo encontrado!" || echo "Arquivo NÃO encontrado!"
+
       - name: Instalar dependências
         run: |
           source .venv/bin/activate
+          cd UniBookMark  # Entrar no diretório correto
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest flake8 black mypy coverage

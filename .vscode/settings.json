@@ -27,7 +27,7 @@
   "editor.bracketPairColorization.enabled": true,
 
   // Configurações de Arquivos
-  "files.autoSave": "off",
+  "files.autoSave": "afterDelay",
   "files.exclude": {
     "**/.git": true,
     "**/.venv": true,
