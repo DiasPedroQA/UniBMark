@@ -21,13 +21,13 @@
   "editor.fontFamily": "Fira Code",
   "editor.fontLigatures": true,
   "editor.fontSize": 14,
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "editor.smoothScrolling": true,
   "editor.cursorBlinking": "phase",
   "editor.bracketPairColorization.enabled": true,
 
   // Configurações de Arquivos
-  "files.autoSave": "afterDelay",
+  "files.autoSave": "onFocusChange",
   "files.exclude": {
     "**/.git": true,
     "**/.venv": true,
@@ -77,6 +77,7 @@
     "dont",
     "dotenv",
     "exceptiongroup",
+    "fastapi",
     "idna",
     "iniconfig",
     "junitxml",
@@ -84,6 +85,7 @@
     "mkdocs",
     "multiplicacao",
     "mypy",
+    "nullable",
     "operacao",
     "pluggy",
     "pycodestyle",
@@ -98,6 +100,9 @@
     "spyproject",
     "tomli",
     "urllib",
+    "uvicorn",
     "venv"
-  ]
+  ],
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  "editor.codeActions.triggerOnFocusChange": true
 }

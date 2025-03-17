@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "uni-bookmark"
+version = "0.1.0"
+description = "Uma aplicação para gerenciar bookmarks."
+authors = ["Seu Nome <seu.email@dominio.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/seuusuario/UniBookMark"
+
+# Dependências para desenvolvimento
+[tool.poetry.dependencies]
+python = "^3.9"
+flask = "^2.0.0"  # Caso esteja utilizando o Flask
+sqlite = "^3.34.0"  # Caso precise especificar uma versão para SQLite
+python-dotenv = "^0.19.0"  # Para carregar variáveis de ambiente
+pytest = "^7.0"  # Framework de teste TDD
+flask-sqlalchemy = "^2.5.1"  # Caso esteja usando SQLAlchemy com Flask
+
+# Dependências de desenvolvimento (para testes, linting, etc.)
+[tool.poetry.dev-dependencies]
+pytest-cov = "^3.0"  # Para cobertura de testes
+flake8 = "^4.0"  # Ferramenta de linting
+black = "^22.0"  # Formatador de código
+tox = "^3.24"  # Para automatizar testes em diferentes ambientes
+
+[tool.poetry.scripts]
+uni-bookmark = "src.app:main"  # Comando de entrada (se for o caso)
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
