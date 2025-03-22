@@ -71,7 +71,7 @@ jobs:
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação com linting e Flake8"
           pip install flake8 || echo "Flake8 não instalado"
-          flake8 UniBMark/src --count --show-source --statistics
+          flake8 . --count --show-source --statistics
 
   format:
     name: Verificar Formatação (Black)
@@ -85,7 +85,7 @@ jobs:
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação de formatação com Black"
           pip install black || echo "Black não instalado"
-          black --check src
+          black --check .
 
   type-check:
     name: Análise Estática (MyPy)
@@ -99,7 +99,7 @@ jobs:
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação de tipagem com Mypy"
           pip install mypy || echo "Mypy não instalado"
-          mypy src
+          mypy .
 
   test:
     name: Executar Testes Unitários (Pytest)
