@@ -165,3 +165,5 @@ site/
 # Arquivos gerados pelo sistema operacional
 .DS_Store
 Thumbs.db
+venv/
+data/db.sqlite3

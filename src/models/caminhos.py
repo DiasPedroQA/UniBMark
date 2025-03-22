@@ -16,7 +16,7 @@ Principais funcionalidades:
 import json
 import os
 from pathlib import Path
-from typing import Union, Dict, Optional
+from typing import Dict, Optional, Union
 
 
 class Caminho:

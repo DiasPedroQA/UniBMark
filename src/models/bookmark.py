@@ -101,7 +101,8 @@ class Arquivo:
 if __name__ == "__main__":
     pasta = Pasta("/home/pedro-pm-dias/Downloads/Firefox/")
     arquivo = Arquivo(
-        "/home/pedro-pm-dias/Downloads/Firefox/bookmarks.html", "Este é o conteúdo do arquivo."
+        "/home/pedro-pm-dias/Downloads/Firefox/bookmarks.html",
+        "Este é o conteúdo do arquivo.",
     )
 
     print(f"Pasta existe? {pasta.existe()}")
