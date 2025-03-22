@@ -60,13 +60,18 @@ jobs:
     needs: setup-python
 
     steps:
+      - name: Verificar estrutura de diretórios
+        run: |
+          echo "Estrutura de diretórios do repositório"
+          tree -L 2  # Isso mostra a estrutura até 2 níveis de profundidade, altere conforme necessário
+
       - name: Verificar linting com Flake8
         run: |
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação com linting e Flake8"
           pip install flake8 || echo "Flake8 não instalado"
-          flake8 src --count --show-source --statistics
+          flake8 UniBMark/src --count --show-source --statistics
 
   format:
     name: Verificar Formatação (Black)
