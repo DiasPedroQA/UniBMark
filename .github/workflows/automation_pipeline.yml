@@ -48,6 +48,7 @@ jobs:
 
       - name: Instalar dependências
         run: |
+          python -m venv .venv
           source .venv/bin/activate
           mkdir cd UniBookMark
           pip freeze > requirements.txt
@@ -63,7 +64,9 @@ jobs:
     steps:
       - name: Verificar linting com Flake8
         run: |
+          python -m venv .venv
           source .venv/bin/activate
+          pip install flake8
           flake8 UniBookMark . --count --show-source --statistics
 
   format:
@@ -74,7 +77,9 @@ jobs:
     steps:
       - name: Verificar formatação com Black
         run: |
+          python -m venv .venv
           source .venv/bin/activate
+          pip install black
           black --check UniBookMark .
 
   type-check:
@@ -85,6 +90,7 @@ jobs:
     steps:
       - name: Verificar tipagem com MyPy
         run: |
+          python -m venv .venv
           source .venv/bin/activate
           mypy src --ignore-missing-imports
 
@@ -96,6 +102,7 @@ jobs:
     steps:
       - name: Executar testes com Pytest
         run: |
+          python -m venv .venv
           source .venv/bin/activate
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
 
