@@ -37,8 +37,8 @@ jobs:
 
       - name: Configurar ambiente virtual e instalar dependências
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
           pip install --upgrade pip
           pip install -r requirements.txt || echo "requirements.txt não encontrado, instalando pacotes necessários..."
@@ -46,7 +46,8 @@ jobs:
 
       - name: Gerar requirements.txt se não existir
         run: |
-          source .venv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
           if [ ! -f requirements.txt ]; then
             echo "requirements.txt não encontrado. Gerando arquivo..."
             pip freeze > requirements.txt
@@ -60,7 +61,8 @@ jobs:
     steps:
       - name: Verificar linting com Flake8
         run: |
-          source .venv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação com linting e Flake8"
           flake8 src . --count --show-source --statistics
 
@@ -72,7 +74,8 @@ jobs:
     steps:
       - name: Verificar formatação com Black
         run: |
-          source .venv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação de formatação com Black"
           black --check src .
 
@@ -84,7 +87,8 @@ jobs:
     steps:
       - name: Verificar tipagem com MyPy
         run: |
-          source .venv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação de tipagem com Mypy"
           mypy src --ignore-missing-imports
 
@@ -96,7 +100,8 @@ jobs:
     steps:
       - name: Executar testes com Pytest
         run: |
-          source .venv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
           echo "Ambiente virtual ativado para a execução de testes com Pytest"
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
 
