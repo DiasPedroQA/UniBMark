@@ -27,7 +27,7 @@
   "editor.bracketPairColorization.enabled": true,
 
   // Configurações de Arquivos
-  "files.autoSave": "onFocusChange",
+  "files.autoSave": "afterDelay",
   "files.exclude": {
     "**/.git": true,
     "**/.venv": true,
@@ -71,11 +71,13 @@
     "beautifulsoup",
     "celerybeat",
     "certifi",
+    "conteudo",
     "cython",
     "descricao",
     "dmypy",
     "dont",
     "dotenv",
+    "Dowlnoads",
     "exceptiongroup",
     "fastapi",
     "idna",
