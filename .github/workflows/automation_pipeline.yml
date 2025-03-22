@@ -38,12 +38,13 @@ jobs:
       - name: Configurar ambiente virtual
         run: |
           python -m venv .venv
-          echo "Ambiente virtual criado"
+          echo "Ambiente virtual criado com sucesso!"
 
       - name: Ativar ambiente virtual e instalar dependências
         run: |
           source .venv/bin/activate
           pip install --upgrade pip
+          pip freeze > requirements.txt
           pip install -r requirements.txt
           pip install pytest flake8 black mypy coverage
 
