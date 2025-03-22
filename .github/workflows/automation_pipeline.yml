@@ -58,14 +58,6 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Instalar dependências para linting
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          echo "Ambiente virtual criado e ativado para a instalação de dependências"
-          pip install --upgrade pip
-          pip install flake8
-
       - name: Verificar linting com Flake8
         run: |
           source .venv/bin/activate
@@ -78,14 +70,6 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Instalar dependências para formatação
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          echo "Ambiente virtual criado e ativado para a instalação de dependências"
-          pip install --upgrade pip
-          pip install black
-
       - name: Verificar formatação com Black
         run: |
           source .venv/bin/activate
@@ -98,14 +82,6 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Instalar dependências para análise estática
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          echo "Ambiente virtual criado e ativado para a instalação de dependências"
-          pip install --upgrade pip
-          pip install mypy
-
       - name: Verificar tipagem com MyPy
         run: |
           source .venv/bin/activate
@@ -118,14 +94,6 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Instalar dependências para testes
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          echo "Ambiente virtual criado e ativado para a instalação de dependências"
-          pip install --upgrade pip
-          pip install pytest coverage
-
       - name: Executar testes com Pytest
         run: |
           source .venv/bin/activate
