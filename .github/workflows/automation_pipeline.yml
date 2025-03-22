@@ -64,6 +64,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação com linting e Flake8"
+          pip install flake8 || echo "Flake8 não instalado"
           flake8 src . --count --show-source --statistics
 
   format:
@@ -77,6 +78,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação de formatação com Black"
+          pip install black || echo "Black não instalado"
           black --check src .
 
   type-check:
@@ -90,6 +92,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação de tipagem com Mypy"
+          pip install mypy || echo "Mypy não instalado"
           mypy src --ignore-missing-imports
 
   test:
@@ -103,6 +106,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual ativado para a execução de testes com Pytest"
+          pip install pytest pytest-cov || echo "Pytest não instalado"
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
 
   publish-report:
