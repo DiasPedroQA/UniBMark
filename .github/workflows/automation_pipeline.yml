@@ -38,10 +38,18 @@ jobs:
       - name: Configurar ambiente virtual
         run: |
           python -m venv .venv
+          echo "Ambiente virtual criado"
+
+      - name: Ativar ambiente virtual e instalar dependências
+        run: |
           source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest flake8 black mypy coverage
 
       - name: Gerar requirements.txt se não existir
         run: |
+          source .venv/bin/activate
           if [ ! -f requirements.txt ]; then
             echo "requirements.txt não encontrado. Gerando arquivo..."
             pip freeze > requirements.txt
@@ -49,15 +57,10 @@ jobs:
 
       - name: Verificar existência de requirements.txt
         run: |
+          source .venv/bin/activate
           if [ ! -f requirements.txt ]; then
             echo "Arquivo requirements.txt não encontrado, mas o pipeline continuará."
           fi
-
-      - name: Instalar dependências
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest flake8 black mypy coverage
 
   lint:
     name: Análise de Código (Flake8)
