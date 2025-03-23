@@ -107,6 +107,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
+          pip install pytest coverage pytest-cov
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
 
   publish-report:
