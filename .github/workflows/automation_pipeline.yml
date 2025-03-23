@@ -26,23 +26,27 @@ jobs:
 
   setup-python:
     name: Configurar Python
-    runs-on: ubuntu-22.04  # Usando Ubuntu 22.04 para garantir a disponibilidade do libbcc
+    runs-on: ubuntu-22.04  # Usando Ubuntu 22.04
     needs: checkout
-
+  
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
-
+  
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'  # Use uma versão compatível
-
+  
+      - name: Adicionar repositório do iovisor
+        run: |
+          echo "deb [trusted=yes] https://repo.iovisor.org/apt/$(lsb_release -cs) $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/iovisor.list
+          sudo apt-get update
+  
       - name: Instalar dependências do sistema
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libbcc
-
+          sudo apt-get install -y bcc-tools libbcc-examples
+  
       - name: Configurar ambiente virtual e instalar dependências
         run: |
           python -m venv venv
