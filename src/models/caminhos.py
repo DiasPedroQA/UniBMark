@@ -41,7 +41,7 @@ class Caminho:
     @caminho.setter
     def caminho(
         self, novo_caminho: str | Path
-    ) -> None:  # Usando `str | Path` no lugar de `Union[str, Path]`
+    ) -> None:
         """Valida, normaliza e armazena o caminho se for válido."""
         if not isinstance(novo_caminho, str) or not novo_caminho.strip():
             raise TypeError("O caminho deve ser uma string válida.")

@@ -110,7 +110,7 @@ def test_determinar_tipo_link_simbolico(link_simbolico_temporario: Path) -> None
 def test_to_dict(arquivo_temporario: Path) -> None:
     """Testa se o método to_dict() retorna as informações corretas."""
     caminho_obj: Caminho = Caminho(str(arquivo_temporario))
-    esperado_dict: dict[str, Union[str, bool]] = {
+    esperado_dict: dict[str, str | bool] = {
         "caminho": str(arquivo_temporario.resolve()),
         "tipo": "arquivo",
         "existe": True,
@@ -123,8 +123,8 @@ def test_to_dict(arquivo_temporario: Path) -> None:
 def test_to_json(arquivo_temporario: Path) -> None:
     """Testa se o método to_json() retorna um JSON válido e correto."""
     caminho_obj: Caminho = Caminho(str(arquivo_temporario))
-    resultado_json: dict[str, Union[str, bool]] = json.loads(caminho_obj.to_json())
-    esperado_json: dict[str, Union[str, bool]] = {
+    resultado_json: dict[str, str | bool] = json.loads(caminho_obj.to_json())
+    esperado_json: dict[str, str | bool] = {
         "caminho": str(arquivo_temporario.resolve()),
         "tipo": "arquivo",
         "existe": True,
