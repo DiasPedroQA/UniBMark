@@ -1,0 +1,16 @@
+[flake8]
+ignore = E203, E501
+max-line-length = 88
+max-complexity = 18
+select = B,C,E,F,W,T4,B9
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,venv,.venv,.tox,*.egg-info,*.egg,.mypy_cache,.pytest_cache
+per-file-ignores =
+    # imported but unused
+    __init__.py: F401
+    # missing type annotation
+    __init__.py: T484
+    # missing type annotation
+    __main__.py
+    # missing type annotation
+    _version.py: T484
+    # missing type annotation
