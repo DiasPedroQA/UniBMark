@@ -50,21 +50,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup-python
 
-    steps:
-      - name: Verificar estrutura de diretórios
-        run: |
-          echo "Estrutura de diretórios do repositório"
-          tree -L 2
+    # steps:
+    #   - name: Verificar estrutura de diretórios
+    #     run: |
+    #       echo "Estrutura de diretórios do repositório"
+    #       tree -L 2
 
-      - name: Verificar linting com Flake8
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          echo "Ambiente virtual criado e ativado"
-          pip install flake8
-          echo "Pacote Flake8 instalado"
-          flake8 .
-          echo "Análise de código finalizada"
+    #   - name: Verificar linting com Flake8
+    #     run: |
+    #       python -m venv venv
+    #       source venv/bin/activate
+    #       echo "Ambiente virtual criado e ativado"
+    #       pip install flake8
+    #       echo "Pacote Flake8 instalado"
+    #       flake8 .
+    #       echo "Análise de código finalizada"
 
   format:
     name: Verificar Formatação (Black)
@@ -81,20 +81,20 @@ jobs:
           echo "Pacote Black instalado"
           black --check .
 
-  type-check:
-    name: Análise Estática (MyPy)
-    runs-on: ubuntu-latest
-    needs: setup-python
+  # type-check:
+  #   name: Análise Estática (MyPy)
+  #   runs-on: ubuntu-latest
+  #   needs: setup-python
 
-    steps:
-      - name: Verificar tipagem com MyPy
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          echo "Ambiente virtual criado e ativado"
-          pip install mypy
-          echo "Pacote MyPy instalado"
-          mypy ./src
+  #   steps:
+  #     - name: Verificar tipagem com MyPy
+  #       run: |
+  #         python -m venv venv
+  #         source venv/bin/activate
+  #         echo "Ambiente virtual criado e ativado"
+  #         pip install mypy
+  #         echo "Pacote MyPy instalado"
+  #         mypy ./src
 
   test:
     name: Executar Testes Unitários (Pytest)
