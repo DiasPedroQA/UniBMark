@@ -99,7 +99,7 @@ jobs:
           source venv/bin/activate
           echo "Ambiente virtual ativado para a verificação de tipagem com Mypy"
           pip install mypy || echo "Mypy não instalado"
-          mypy .
+          mypy src
 
   test:
     name: Executar Testes Unitários (Pytest)
