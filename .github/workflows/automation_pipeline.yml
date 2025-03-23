@@ -63,7 +63,8 @@ jobs:
           echo "Ambiente virtual criado e ativado"
           pip install flake8
           echo "Pacote Flake8 instalado"
-          flake8 . --count --show-source --statistics
+          flake8 .
+          echo "Análise de código finalizada"
 
   format:
     name: Verificar Formatação (Black)
