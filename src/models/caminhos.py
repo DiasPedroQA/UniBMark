@@ -16,7 +16,7 @@ Principais funcionalidades:
 import json
 import os
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 
 class Caminho:
@@ -27,7 +27,8 @@ class Caminho:
 
     def __init__(self, caminho: str) -> None:
         self._caminho: Optional[Path] = None
-        self._cache: Dict[Union[Path, str], Union[bool, str]] = {}
+        self._cache: Dict[Path, bool] = {}  # Cache para permissões de caminhos
+        self._tipo_cache: Dict[str, str] = {}  # Cache separado para tipos e outros dados
         self.caminho = Path(caminho).resolve()
 
     @property
@@ -38,7 +39,9 @@ class Caminho:
         return self._caminho
 
     @caminho.setter
-    def caminho(self, novo_caminho: Union[str, Path]) -> None:
+    def caminho(
+        self, novo_caminho: str | Path
+    ) -> None:  # Usando `str | Path` no lugar de `Union[str, Path]`
         """Valida, normaliza e armazena o caminho se for válido."""
         if not isinstance(novo_caminho, str) or not novo_caminho.strip():
             raise TypeError("O caminho deve ser uma string válida.")
@@ -69,9 +72,8 @@ class Caminho:
 
     def _determinar_tipo(self) -> str:
         """Determina se o caminho é um arquivo, diretório ou link simbólico."""
-        if "tipo" in self._cache:
-            return str(self._cache["tipo"])
-
+        if "tipo" in self._tipo_cache:
+            return self._tipo_cache["tipo"]
         if self._caminho is None:
             return "desconhecido"
 
@@ -84,11 +86,14 @@ class Caminho:
                 else "link simbólico" if self._caminho.is_symlink() else "desconhecido"
             )
         )
-
-        self._cache["tipo"] = tipo
+        self._tipo_cache["tipo"] = tipo
         return tipo
 
-    def to_dict(self) -> Dict[str, Union[str, bool, None]]:
+    def to_dict(
+        self,
+    ) -> Dict[
+        str, str | bool | None
+    ]:
         """Retorna um dicionário com informações do caminho."""
         return {
             "caminho": str(self._caminho) if self._caminho else "",
