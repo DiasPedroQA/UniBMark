@@ -59,7 +59,10 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual ativado"
+          pip install black || echo "Ignorando erros de instalação..."
+          echo "Instalando Black"
           black --check .
+
 
   test:
     name: Executar Testes Unitários (Pytest)
