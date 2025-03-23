@@ -35,15 +35,24 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Instalar dependências do sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libbcc
+
       - name: Configurar ambiente virtual e instalar dependências
         run: |
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
           pip install --upgrade pip
+          echo "Pacote pip atualizado"
           pip freeze > requirements.txt
+          echo "Lista de dependências salva"
           pip install -r requirements.txt
+          echo "Dependências instaladas"
           pip install pytest flake8 black mypy coverage
+          echo "Pacotes de desenvolvimento instalados"
 
   # lint:
   #   name: Análise de Código (Flake8)
