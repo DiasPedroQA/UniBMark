@@ -38,10 +38,6 @@ jobs:
         with:
           python-version: '3.10'  # Use uma versão compatível
 
-      - name: Instalar dependências do sistema
-        run: |
-          sudo apt-get install -y bcc-tools libbcc-examples
-
       - name: Configurar ambiente virtual e instalar dependências
         run: |
           python -m venv venv
