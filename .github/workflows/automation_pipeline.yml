@@ -41,6 +41,7 @@ jobs:
           source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
           pip install --upgrade pip
+          pip freeze > requirements.txt
           pip install -r requirements.txt
           pip install pytest flake8 black mypy coverage
 
