@@ -45,26 +45,26 @@ jobs:
           pip install -r requirements.txt
           pip install pytest flake8 black mypy coverage
 
-  lint:
-    name: Análise de Código (Flake8)
-    runs-on: ubuntu-latest
-    needs: setup-python
+  # lint:
+  #   name: Análise de Código (Flake8)
+  #   runs-on: ubuntu-latest
+  #   needs: setup-python
 
-    # steps:
-    #   - name: Verificar estrutura de diretórios
-    #     run: |
-    #       echo "Estrutura de diretórios do repositório"
-    #       tree -L 2
+  #   steps:
+  #     - name: Verificar estrutura de diretórios
+  #       run: |
+  #         echo "Estrutura de diretórios do repositório"
+  #         tree -L 2
 
-    #   - name: Verificar linting com Flake8
-    #     run: |
-    #       python -m venv venv
-    #       source venv/bin/activate
-    #       echo "Ambiente virtual criado e ativado"
-    #       pip install flake8
-    #       echo "Pacote Flake8 instalado"
-    #       flake8 .
-    #       echo "Análise de código finalizada"
+  #     - name: Verificar linting com Flake8
+  #       run: |
+  #         python -m venv venv
+  #         source venv/bin/activate
+  #         echo "Ambiente virtual criado e ativado"
+  #         pip install flake8
+  #         echo "Pacote Flake8 instalado"
+  #         flake8 .
+  #         echo "Análise de código finalizada"
 
   format:
     name: Verificar Formatação (Black)
