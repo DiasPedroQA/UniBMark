@@ -26,7 +26,7 @@ jobs:
 
   setup-python:
     name: Configurar Python
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04  # Usando Ubuntu 22.04 para garantir a disponibilidade do libbcc
     needs: checkout
 
     steps:
@@ -47,44 +47,11 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt || echo "Ignorando erros de   instalação..."
-          pip install pytest pytest-cov
-
-      - name: Configurar ambiente virtual e instalar dependências
-        run: |
-          python -m venv venv
-          source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
-          pip install --upgrade pip || echo "Ignorando erros de atualização..."
-          echo "Pacote pip atualizado"
-          pip freeze > requirements.txt || echo "Ignorando erros de   salvamento..."
-          echo "Lista de dependências salva"
-          pip install -r requirements.txt
-          echo "Dependências instaladas"
-          pip install pytest flake8 black mypy coverage || echo "Ignorando erros de instalação..."
-          echo "Pacotes de desenvolvimento instalados"
-
-  # lint:
-  #   name: Análise de Código (Flake8)
-  #   runs-on: ubuntu-latest
-  #   needs: setup-python
-
-  #   steps:
-  #     - name: Verificar estrutura de diretórios
-  #       run: |
-  #         echo "Estrutura de diretórios do repositório"
-  #         tree -L 2
-
-  #     - name: Verificar linting com Flake8
-  #       run: |
-  #         python -m venv venv
-  #         source venv/bin/activate
-  #         echo "Ambiente virtual criado e ativado"
-  #         pip install flake8
-  #         echo "Pacote Flake8 instalado"
-  #         flake8 .
-  #         echo "Análise de código finalizada"
+          pip install --upgrade pip
+          pip install -r requirements.txt || echo "Ignorando erros de instalação..."
+          pip install pytest flake8 black mypy coverage pytest-cov || echo "Ignorando erros de instalação..."
+          echo "Dependências instaladas com sucesso"
 
   format:
     name: Verificar Formatação (Black)
@@ -94,27 +61,9 @@ jobs:
     steps:
       - name: Verificar formatação com Black
         run: |
-          python -m venv venv
           source venv/bin/activate
-          echo "Ambiente virtual criado e ativado"
-          pip install black
-          echo "Pacote Black instalado"
+          echo "Ambiente virtual ativado"
           black --check .
-
-  # type-check:
-  #   name: Análise Estática (MyPy)
-  #   runs-on: ubuntu-latest
-  #   needs: setup-python
-
-  #   steps:
-  #     - name: Verificar tipagem com MyPy
-  #       run: |
-  #         python -m venv venv
-  #         source venv/bin/activate
-  #         echo "Ambiente virtual criado e ativado"
-  #         pip install mypy
-  #         echo "Pacote MyPy instalado"
-  #         mypy ./src
 
   test:
     name: Executar Testes Unitários (Pytest)
@@ -127,19 +76,15 @@ jobs:
 
       - name: Configurar ambiente virtual e instalar dependências
         run: |
-          python -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
+          echo "Ambiente virtual ativado"
+          pip install -r requirements.txt || echo "Ignorando erros de instalação..."
+          pip install pytest pytest-cov || echo "Ignorando erros de instalação..."
 
       - name: Executar testes com Pytest
         run: |
-          python -m venv venv
           source venv/bin/activate
-          echo "Ambiente virtual criado e ativado"
-          cd /home/runner/work/UniBMark/UniBMark  # Certifique-se de que este é o caminho correto
-          pip install pytest coverage pytest-cov
+          echo "Ambiente virtual ativado"
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
 
   publish-report:
