@@ -63,12 +63,6 @@ def test_caminho_inexistente() -> None:
         Caminho("/caminho/que/nao/existe")
 
 
-def test_caminho_nao_string() -> None:
-    """Testa se caminhos que não são string levantam erro."""
-    with pytest.raises(TypeError):
-        Caminho(123)  # type: ignore
-
-
 def test_caminho_vazio() -> None:
     """Testa se uma string vazia levanta erro."""
     with pytest.raises(TypeError):

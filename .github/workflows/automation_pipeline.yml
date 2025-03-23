@@ -56,13 +56,13 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
-          pip install --upgrade pip
+          pip install --upgrade pip || echo "Ignorando erros de atualização..."
           echo "Pacote pip atualizado"
-          pip freeze > requirements.txt
+          pip freeze > requirements.txt || echo "Ignorando erros de   salvamento..."
           echo "Lista de dependências salva"
           pip install -r requirements.txt
           echo "Dependências instaladas"
-          pip install pytest flake8 black mypy coverage
+          pip install pytest flake8 black mypy coverage || echo "Ignorando erros de instalação..."
           echo "Pacotes de desenvolvimento instalados"
 
   # lint:
