@@ -41,18 +41,8 @@ jobs:
           source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
           pip install --upgrade pip
-          pip freeze > requirements.txt
-          pip install -r requirements.txt || echo "requirements.txt não encontrado, instalando pacotes necessários..."
+          pip install -r requirements.txt
           pip install pytest flake8 black mypy coverage
-
-      - name: Gerar requirements.txt se não existir
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          if [ ! -f requirements.txt ]; then
-            echo "requirements.txt não encontrado. Gerando arquivo..."
-            pip freeze > requirements.txt
-          fi
 
   lint:
     name: Análise de Código (Flake8)
@@ -63,14 +53,13 @@ jobs:
       - name: Verificar estrutura de diretórios
         run: |
           echo "Estrutura de diretórios do repositório"
-          tree -L 2  # Isso mostra a estrutura até 2 níveis de profundidade, altere conforme necessário
+          tree -L 2
 
       - name: Verificar linting com Flake8
         run: |
           python -m venv venv
           source venv/bin/activate
-          echo "Ambiente virtual ativado para a verificação com linting e Flake8"
-          pip install flake8 || echo "Flake8 não instalado"
+          echo "Ambiente virtual criado e ativado"
           flake8 . --count --show-source --statistics
 
   format:
@@ -83,8 +72,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          echo "Ambiente virtual ativado para a verificação de formatação com Black"
-          pip install black || echo "Black não instalado"
+          echo "Ambiente virtual criado e ativado"
           black --check .
 
   type-check:
@@ -95,11 +83,7 @@ jobs:
     steps:
       - name: Verificar tipagem com MyPy
         run: |
-          python -m venv venv
           source venv/bin/activate
-          echo "Ambiente virtual ativado para a verificação de tipagem com Mypy"
-          pip install mypy || echo "Mypy não instalado"
-          ls
           mypy ./src
 
   test:
@@ -112,8 +96,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          echo "Ambiente virtual ativado para a execução de testes com Pytest"
-          pip install pytest pytest-cov || echo "Pytest não instalado"
+          echo "Ambiente virtual criado e ativado"
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
 
   publish-report:
