@@ -61,6 +61,8 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
+          pip install flake8
+          echo "Pacote Flake8 instalado"
           flake8 . --count --show-source --statistics
 
   format:
@@ -74,6 +76,8 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           echo "Ambiente virtual criado e ativado"
+          pip install black
+          echo "Pacote Black instalado"
           black --check .
 
   type-check:
