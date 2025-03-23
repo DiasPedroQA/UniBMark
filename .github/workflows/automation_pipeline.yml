@@ -26,7 +26,7 @@ jobs:
 
   setup-python:
     name: Configurar Python
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: checkout
 
     steps:
