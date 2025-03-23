@@ -88,7 +88,11 @@ jobs:
     steps:
       - name: Verificar tipagem com MyPy
         run: |
+          python -m venv venv
           source venv/bin/activate
+          echo "Ambiente virtual criado e ativado"
+          pip install mypy
+          echo "Pacote MyPy instalado"
           mypy ./src
 
   test:
