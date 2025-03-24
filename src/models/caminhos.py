@@ -16,17 +16,15 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from config.building import REGEX_CAMINHO_ABSOLUTO, REGEX_CAMINHO_RELATIVO
-
 
 class Caminho:
     """
     Classe para manipulação de caminhos usando apenas expressões regulares.
     """
 
-    def __init__(self, caminho: str) -> None:
+    def __init__(self, caminho_inicial: str) -> None:
         """Inicializa a instância e valida o caminho."""
-        self._caminho = self._validar_caminho(caminho)
+        self._caminho = self._validar_caminho(caminho_inicial)
 
     @property
     def caminho(self) -> str:
@@ -34,25 +32,27 @@ class Caminho:
         return self._caminho
 
     @staticmethod
-    def _validar_caminho(caminho: str) -> str:
+    def _validar_caminho(caminho_atual: str) -> str:
         """Valida e normaliza um caminho usando regex."""
-        if not isinstance(caminho, str) or not caminho.strip():
+        if not isinstance(caminho_atual, str) or not caminho_atual.strip():
             raise TypeError("O caminho deve ser uma string não vazia.")
 
-        caminho = os.path.abspath(caminho)  # Normaliza o caminho
+        caminho_atual = os.path.abspath(caminho_atual)  # Normaliza o caminho
 
-        if not os.path.exists(caminho):
-            raise FileNotFoundError(f"O caminho não existe: {caminho}")
+        if not os.path.exists(caminho_atual):
+            raise FileNotFoundError(f"O caminho atual não existe: {caminho_atual}")
 
-        if not Caminho._verificar_permissao(caminho):
-            raise PermissionError(f"Sem permissão de leitura e escrita: {caminho}")
+        if not Caminho._verificar_permissao(caminho_atual):
+            raise PermissionError(
+                f"Sem permissão de leitura e escrita: {caminho_atual}"
+            )
 
-        return caminho
+        return caminho_atual
 
     @staticmethod
-    def _verificar_permissao(caminho: str) -> bool:
+    def _verificar_permissao(caminho_atual: str) -> bool:
         """Verifica permissão de leitura e escrita."""
-        return os.access(caminho, os.R_OK | os.W_OK)
+        return os.access(caminho_atual, os.R_OK | os.W_OK)
 
     def _determinar_tipo(self) -> str:
         """Determina se o caminho é um arquivo, diretório ou link simbólico."""
