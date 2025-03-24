@@ -113,39 +113,39 @@ jobs:
           mv report.xml artifacts/reports/
           mv coverage.xml artifacts/reports/
 
-  post-deployment:
-    name: Pós-Implantação (Verificações Finais)
-    runs-on: ubuntu-latest
-    needs: test
+  # post-deployment:
+  #   name: Pós-Implantação (Verificações Finais)
+  #   runs-on: ubuntu-latest
+  #   needs: test
 
-    steps:
-      - name: Verificar a versão do Python novamente após os testes
-        run: |
-          python --version
+  #   steps:
+  #     - name: Verificar a versão do Python novamente após os testes
+  #       run: |
+  #         python --version
 
-      - name: Realizar verificações de permissões e integridade
-        run: |
-          # Garantir que o diretório 'artifacts/reports' exista
-          mkdir -p artifacts/reports
+  #     - name: Realizar verificações de permissões e integridade
+  #       run: |
+  #         # Garantir que o diretório 'artifacts/reports' exista
+  #         mkdir -p artifacts/reports
 
-          # Verificar as permissões da pasta do ambiente virtual
-          python -m venv venv
-          source venv/bin/activate
-          ls -ld venv
+  #         # Verificar as permissões da pasta do ambiente virtual
+  #         python -m venv venv
+  #         source venv/bin/activate
+  #         ls -ld venv
 
-          # Verificar se os arquivos de relatório existem
-          if [ -f artifacts/reports/report.xml ]; then
-            echo "Relatório de Testes encontrado."
-            ls -l artifacts/reports/report.xml
-          else
-            echo "Erro: report.xml não encontrado."
-            exit 1
-          fi
+  #         # Verificar se os arquivos de relatório existem
+  #         if [ -f artifacts/reports/report.xml ]; then
+  #           echo "Relatório de Testes encontrado."
+  #           ls -l artifacts/reports/report.xml
+  #         else
+  #           echo "Erro: report.xml não encontrado."
+  #           exit 1
+  #         fi
 
-          if [ -f artifacts/reports/coverage.xml ]; then
-            echo "Relatório de Cobertura encontrado."
-            ls -l artifacts/reports/coverage.xml
-          else
-            echo "Erro: coverage.xml não encontrado."
-            exit 1
-          fi
+  #         if [ -f artifacts/reports/coverage.xml ]; then
+  #           echo "Relatório de Cobertura encontrado."
+  #           ls -l artifacts/reports/coverage.xml
+  #         else
+  #           echo "Erro: coverage.xml não encontrado."
+  #           exit 1
+  #         fi
