@@ -12,7 +12,9 @@ Testa diversas funcionalidades, incluindo a verificação de tipos, permissões 
 
 
 import os
+
 import pytest
+
 from src.models.caminhos import Caminho
 
 
