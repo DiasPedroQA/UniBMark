@@ -115,6 +115,7 @@
     "tomli",
     "urllib",
     "uvicorn",
+    "validacao",
     "venv",
     "Werkzeug"
   ],
