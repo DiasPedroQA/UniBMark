@@ -129,6 +129,8 @@ jobs:
           mkdir -p artifacts/reports
 
           # Verificar as permissões da pasta do ambiente virtual
+          python -m venv venv
+          source venv/bin/activate
           ls -ld venv
 
           # Verificar se os arquivos de relatório existem
