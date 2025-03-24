@@ -125,6 +125,8 @@ jobs:
 
       - name: Realizar verificações de permissões e integridade
         run: |
+          python -m venv venv
+          source venv/bin/activate
           ls -ld venv
           ls -l artifacts/reports/report.xml
           ls -l artifacts/reports/coverage.xml
