@@ -113,11 +113,6 @@ jobs:
 
       - name: Verificar a existência do arquivo de relatório
         run: |
-          ls -l report.xml || echo "report.xml não encontrado"
-          ls -l coverage.xml || echo "coverage.xml não encontrado"
-
-      - name: Validar formato do relatório de testes
-        run: |
           if [ ! -f report.xml ]; then
             echo "Erro: report.xml não foi gerado."
             exit 1
