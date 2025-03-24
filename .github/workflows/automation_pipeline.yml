@@ -96,7 +96,7 @@ jobs:
 
     steps:
       - name: Checkout do repositório
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Atualizado para a versão mais recente
 
       - name: Configurar ambiente virtual e instalar dependências
         run: |
@@ -108,9 +108,7 @@ jobs:
 
       - name: Executar testes com Pytest
         run: |
-          python -m venv venv
           source venv/bin/activate
-          pip install pytest pytest-cov
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
 
       - name: Verificar a existência do arquivo de relatório
@@ -125,13 +123,13 @@ jobs:
           fi
 
       - name: Publicar Relatório de Testes
-        uses: actions/upload-artifact@v2  # Alterado para v2
+        uses: actions/upload-artifact@v3  # Atualizado para a versão mais recente
         with:
           name: pytest-report
           path: report.xml
 
       - name: Publicar Relatório de Cobertura
-        uses: actions/upload-artifact@v2  # Alterado para v2
+        uses: actions/upload-artifact@v3  # Atualizado para a versão mais recente
         with:
           name: coverage-report
           path: coverage.xml
