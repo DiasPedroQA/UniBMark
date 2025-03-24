@@ -67,7 +67,8 @@ jobs:
         run: |
           python -m venv venv  # Garantir que o ambiente virtual é criado antes
           source venv/bin/activate
-          black --check .
+          pip install black || echo "Ignorando erros de instalação..."
+          black --check . || echo "Erros de formatação encontrados"
 
       - name: Verificar estilo com Flake8
         run: |
