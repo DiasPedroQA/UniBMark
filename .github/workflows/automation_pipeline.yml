@@ -54,6 +54,7 @@ jobs:
 
       - name: Validar dependências instaladas
         run: |
+          source venv/bin/activate
           pip freeze
 
   lint:
@@ -62,13 +63,9 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Configurar ambiente virtual
-        run: |
-          source venv/bin/activate
-          pip install flake8 black pylint mypy || echo "Ignorando erros de instalação..."
-
       - name: Verificar formatação com Black
         run: |
+          python -m venv venv  # Garantir que o ambiente virtual é criado antes
           source venv/bin/activate
           black --check .
 
@@ -86,6 +83,7 @@ jobs:
         run: |
           source venv/bin/activate
           mypy src/
+
 
   test:
     name: Executar Testes Unitários (Pytest)
