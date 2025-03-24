@@ -72,6 +72,7 @@
     "beautifulsoup",
     "celerybeat",
     "certifi",
+    "comparacao",
     "conteudo",
     "cython",
     "descricao",

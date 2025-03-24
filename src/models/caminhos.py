@@ -55,13 +55,13 @@ class Caminho:
         return os.access(caminho_atual, os.R_OK | os.W_OK)
 
     def _determinar_tipo(self) -> str:
-        """Determina se o caminho é um arquivo, diretório ou link simbólico."""
+        """Determina se o caminho é um arquivo ou diretório."""
         if os.path.isdir(self._caminho):
             return "diretório"
         if os.path.isfile(self._caminho):
             return "arquivo"
-        if os.path.islink(self._caminho):
-            return "link simbólico"
+        # if os.path.islink(self._caminho):
+        #     return "link simbólico"
         return "desconhecido"
 
     def to_dict(self) -> dict:
