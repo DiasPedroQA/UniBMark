@@ -15,7 +15,6 @@ colorama==0.4.6
 configobj==5.0.8
 cryptography==41.0.7
 cssselect==1.2.0
-cupshelpers==1.0
 dbus-python==1.3.2
 defer==1.0.6
 dill==0.3.8
@@ -93,11 +92,7 @@ pyparsing==3.1.1
 pyrsistent==0.20.0
 pyserial==3.5
 pytest==8.3.4
-python-apt==2.7.7+ubuntu4
-python-dateutil==2.8.2
-python-debian==0.1.49+ubuntu2
-pytz==2024.1
-pyxdg==0.28
+pytest-cov>=3.0.0
 PyYAML==6.0.1
 requests==2.31.0
 rich==13.7.1
