@@ -1,17 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="11" time="0.131" timestamp="2025-03-24T02:06:29.030746-03:00" hostname="ubuntu24-B550M-AORUS-ELITE"><testcase classname="tests.models.test_caminhos" name="test_caminho_instantiation_with_valid_path" time="0.004" /><testcase classname="tests.models.test_caminhos" name="test_caminho_instantiation_with_invalid_path" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_instantiation_with_empty_string" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_instantiation_with_non_string" time="0.000" /><testcase classname="tests.models.test_caminhos" name="test_caminho_permission_error" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_to_dict" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_to_json" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_equality" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_instantiation_with_directory" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_instantiation_with_file" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_caminho_instantiation_with_symlink" time="0.003"><failure message="AssertionError: assert 'arquivo' == 'link simbólico'&#10;  &#10;  - link simbólico&#10;  + arquivo">tmp_path = PosixPath('/tmp/pytest-of-pedro-pm-dias/pytest-11/test_caminho_instantiation_wit3')
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="0.126" timestamp="2025-03-24T02:12:30.541805-03:00" hostname="ubuntu24-B550M-AORUS-ELITE"><testcase classname="tests.models.test_caminhos" name="test_caminho_valido" time="0.002" /><testcase classname="tests.models.test_caminhos" name="test_caminho_inexistente" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_sem_permissao" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_valida_tipo_diretorio" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_valida_tipo_arquivo" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_valida_tipo_link_simbolico" time="0.001"><failure message="AssertionError: assert 'arquivo' == 'link simbólico'&#10;  &#10;  - link simbólico&#10;  + arquivo">caminho_link_simbolico = Caminho(caminho=/home/pedro-pm-dias/Downloads/Firefox/sym_link)
 
-    def test_caminho_instantiation_with_symlink(tmp_path):
-        """Testa a criação de um objeto Caminho com um link simbólico válido."""
-        target_file = tmp_path / "target_file.txt"
-        target_file.write_text("conteúdo de teste")
-        symlink_path = tmp_path / "symlink"
-        symlink_path.symlink_to(target_file)
-    
-        caminho = Caminho(str(symlink_path))
-&gt;       assert caminho._determinar_tipo() == "link simbólico"
+    def test_valida_tipo_link_simbolico(caminho_link_simbolico):
+&gt;       assert caminho_link_simbolico._determinar_tipo() == "link simbólico"
 E       AssertionError: assert 'arquivo' == 'link simbólico'
 E         
 E         - link simbólico
 E         + arquivo
 
-tests/models/test_caminhos.py:127: AssertionError</failure></testcase></testsuite></testsuites>
+tests/models/test_caminhos.py:66: AssertionError</failure></testcase><testcase classname="tests.models.test_caminhos" name="test_comparacao_caminhos" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_to_dict" time="0.000" /><testcase classname="tests.models.test_caminhos" name="test_to_json" time="0.001" /><testcase classname="tests.models.test_caminhos" name="test_repr" time="0.001" /></testsuite></testsuites>

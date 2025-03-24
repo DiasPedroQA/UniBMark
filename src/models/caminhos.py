@@ -85,13 +85,3 @@ class Caminho:
     def __eq__(self, other) -> bool:
         """Compara dois objetos Caminho pelo caminho absoluto."""
         return isinstance(other, Caminho) and self._caminho == other._caminho
-
-
-if __name__ == "__main__":
-    caminho_pasta = Caminho("/home/pedro-pm-dias/Downloads/Firefox/")
-    print(caminho_pasta)
-    print(caminho_pasta.to_json())
-    print("*" * 50)
-    caminho_arquivo = Caminho("/home/pedro-pm-dias/Downloads/Firefox/bookmarks.html")
-    print(caminho_arquivo)
-    print(caminho_arquivo.to_json())
