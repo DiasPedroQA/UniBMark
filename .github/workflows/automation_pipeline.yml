@@ -123,13 +123,13 @@ jobs:
           fi
 
       - name: Publicar Relatório de Testes
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: pytest-report
           path: report.xml
 
       - name: Publicar Relatório de Cobertura
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: coverage-report
           path: coverage.xml
