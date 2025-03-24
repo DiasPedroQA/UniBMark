@@ -125,8 +125,25 @@ jobs:
 
       - name: Realizar verificações de permissões e integridade
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          # Garantir que o diretório 'artifacts/reports' exista
+          mkdir -p artifacts/reports
+
+          # Verificar as permissões da pasta do ambiente virtual
           ls -ld venv
-          ls -l artifacts/reports/report.xml
-          ls -l artifacts/reports/coverage.xml
+
+          # Verificar se os arquivos de relatório existem
+          if [ -f artifacts/reports/report.xml ]; then
+            echo "Relatório de Testes encontrado."
+            ls -l artifacts/reports/report.xml
+          else
+            echo "Erro: report.xml não encontrado."
+            exit 1
+          fi
+
+          if [ -f artifacts/reports/coverage.xml ]; then
+            echo "Relatório de Cobertura encontrado."
+            ls -l artifacts/reports/coverage.xml
+          else
+            echo "Erro: coverage.xml não encontrado."
+            exit 1
+          fi
