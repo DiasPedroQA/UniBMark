@@ -100,3 +100,28 @@ def test_caminho_equality(mock_valid_path, tmp_path):
 
     assert caminho1 == caminho2
     assert caminho1 != caminho3
+
+
+def test_caminho_instantiation_with_directory(mock_valid_path):
+    """Testa a criação de um objeto Caminho com um diretório válido."""
+    caminho = Caminho(mock_valid_path)
+    assert caminho._determinar_tipo() == "diretório"
+
+
+def test_caminho_instantiation_with_file(tmp_path):
+    """Testa a criação de um objeto Caminho com um arquivo válido."""
+    valid_file = tmp_path / "valid_file.txt"
+    valid_file.write_text("conteúdo de teste")
+    caminho = Caminho(str(valid_file))
+    assert caminho._determinar_tipo() == "arquivo"
+
+
+def test_caminho_instantiation_with_symlink(tmp_path):
+    """Testa a criação de um objeto Caminho com um link simbólico válido."""
+    target_file = tmp_path / "target_file.txt"
+    target_file.write_text("conteúdo de teste")
+    symlink_path = tmp_path / "symlink"
+    symlink_path.symlink_to(target_file)
+
+    caminho = Caminho(str(symlink_path))
+    assert caminho._determinar_tipo() == "link simbólico"

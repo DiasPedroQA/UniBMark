@@ -7,7 +7,7 @@ Esta classe permite:
 - Identificação do tipo do caminho (arquivo, diretório, link simbólico).
 - Exportação de informações do caminho em dicionário ou JSON.
 
-Compatível com Python 3.12.
+Compatível com Python 3.12.3
 """
 
 import json
@@ -88,6 +88,10 @@ class Caminho:
 
 
 if __name__ == "__main__":
-    caminho = Caminho("/home/pedro-pm-dias/Downloads/Firefox/")
-    print(caminho)
-    print(caminho.to_json())
+    caminho_pasta = Caminho("/home/pedro-pm-dias/Downloads/Firefox/")
+    print(caminho_pasta)
+    print(caminho_pasta.to_json())
+    print("*" * 50)
+    caminho_arquivo = Caminho("/home/pedro-pm-dias/Downloads/Firefox/bookmarks.html")
+    print(caminho_arquivo)
+    print(caminho_arquivo.to_json())
