@@ -18,8 +18,10 @@ Nota: Este módulo utiliza o framework pytest para a execução dos testes.
 
 
 from unittest.mock import patch
+
 import pytest
-from src.models.caminhos import Caminho, PathType, PathError
+
+from src.models.caminhos import Caminho, PathError, PathType
 
 
 @pytest.fixture
