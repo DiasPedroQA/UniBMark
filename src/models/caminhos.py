@@ -1,19 +1,11 @@
-# Description: Manipulação segura de caminhos do sistema de arquivos
-# Expected: A classe Caminho deve fornecer validação robusta de caminhos,
-# controle de acesso via getter/setter com validação,
-# verificação de permissões, identificação do tipo
-# (arquivo, diretório, link), exportação para dict e JSON e representações consistentes do objeto.
-# Actual: A classe Caminho fornece validação robusta de caminhos,
-# controle de acesso via getter/setter com validação,
-# verificação de permissões, identificação do tipo
-# (arquivo, diretório, link), exportação para dict
-# e JSON e representações consistentes do objeto.
+# pylint: disable=protected-access
 
 """
 Módulo Caminho - Manipulação segura de caminhos do sistema de arquivos
 
 Esta classe fornece:
-- Validação robusta de caminhos
+- Validação robusta de caminhos (absolutos e relativos)
+- Conversão automática de caminhos relativos para absolutos
 - Controle de acesso via getter/setter com validação
 - Verificação de permissões
 - Identificação do tipo (arquivo, diretório, link)
@@ -21,173 +13,148 @@ Esta classe fornece:
 - Representações consistentes do objeto
 
 Exemplo de uso:
-    >>> caminho = Caminho("/pasta/valida")
-    >>> caminho.caminho = "/novo/caminho"  # Atualiza com validação
+    >>> caminho = Caminho("../pasta/relativa")  # Aceita caminhos relativos
     >>> print(caminho.to_json())  # Saída formatada em JSON
     >>> dados = caminho.to_dict()  # Dicionário com metadados
 """
 
 import json
 import os
+from dataclasses import dataclass, field
+from enum import Enum
+from pathlib import Path
+from typing import Literal, Optional, Union
 
 
+class PathType(str, Enum):
+    """Enumeração de tipos de caminhos do sistema de arquivos."""
+    FILE = "arquivo"
+    DIR = "diretório"
+    SYMLINK = "link simbólico"
+    UNKNOWN = "desconhecido"
+    INVALID = "inválido"
+
+
+@dataclass
+class PathError:
+    """Representa um erro de caminho inválido."""
+    type: str
+    message: str
+
+
+@dataclass
 class Caminho:
-    """
-    Classe para manipulação segura de caminhos do sistema de arquivos.
+    """Representa um caminho do sistema de arquivos (válido ou inválido)."""
 
-    Attributes:
-        _caminho (str): Caminho absoluto validado do arquivo/diretório
-    """
+    raw_path: str
+    _resolved_path: Optional[Path] = field(default=None, init=False, repr=False)
+    _error: Optional[PathError] = field(default=None, init=False, repr=False)
+    _state: Literal["valid", "invalid"] = field(default="invalid", init=False, repr=False)
 
-    def __init__(self, caminho_inicial: str) -> None:
-        """
-        Inicializa a instância com validação do caminho.
+    def __post_init__(self):
+        self._validate()
 
-        Args:
-            caminho_inicial: Caminho a ser validado e armazenado
+    def _validate(self) -> None:
+        """Valida o caminho automaticamente após inicialização."""
+        try:
+            path: Path = Path(self.raw_path).resolve(strict=True)
 
-        Raises:
-            TypeError: Se o caminho não for string ou for vazio
-            FileNotFoundError: Se o caminho não existir
-            PermissionError: Sem permissões de leitura/escrita
-        """
-        self._caminho = self._validar_caminho(caminho_inicial)
+            if not os.access(path, os.R_OK | os.W_OK):
+                raise PermissionError(f"Sem permissões em: {path}")
+
+            self._resolved_path = path
+            self._state = "valid"
+
+        except (TypeError, RuntimeError, OSError) as e:
+            self._error = PathError(type=e.__class__.__name__, message=str(e))
+            self._state = "invalid"
 
     @property
-    def caminho(self) -> str:
-        """
-        Getter para o caminho armazenado.
+    def is_valid(self) -> bool:
+        """Retorna True se o caminho for válido."""
+        return self._state == "valid"
 
-        Returns:
-            str: Caminho absoluto validado
-        """
-        return self._caminho
+    @property
+    def path(self) -> Optional[Path]:
+        """Retorna o objeto Path se válido."""
+        return self._resolved_path if self.is_valid else None
 
-    @caminho.setter
-    def caminho(self, novo_caminho: str) -> None:
-        """
-        Setter com validação para atualizar o caminho.
-
-        Args:
-            novo_caminho: Novo caminho a ser validado e armazenado
-
-        Raises:
-            Mesmas exceções que _validar_caminho
-        """
-        self._caminho = self._validar_caminho(novo_caminho)
-
-    @staticmethod
-    def _verificar_permissao(caminho_atual: str) -> bool:
-        """Verifica permissão de leitura e escrita."""
-        return os.access(caminho_atual, os.R_OK | os.W_OK)
-
-    @staticmethod
-    def _validar_caminho(caminho_atual: str) -> str:
-        """
-        Valida e normaliza um caminho.
-
-        Args:
-            caminho_atual: Caminho a ser validado
-
-        Returns:
-            str: Caminho absoluto validado
-
-        Raises:
-            TypeError: Se o caminho não for string ou for vazio
-            FileNotFoundError: Se o caminho não existir
-            PermissionError: Sem permissões de leitura/escrita
-        """
-        if not isinstance(caminho_atual, str) or not caminho_atual.strip():
-            raise TypeError("O caminho deve ser uma string não vazia.")
-
-        caminho_atual = os.path.abspath(caminho_atual)
-
-        if not os.path.exists(caminho_atual):
-            raise FileNotFoundError(f"O caminho não existe: {caminho_atual}")
-
-        if not Caminho._verificar_permissao(caminho_atual):
-            raise PermissionError(f"Sem permissão em: {caminho_atual}")
-
-        return caminho_atual
-
-    def _determinar_tipo(self) -> str:
+    @property
+    def type(self) -> PathType:
         """Determina o tipo do caminho."""
-        if os.path.isdir(self._caminho):
-            return "diretório"
-        if os.path.isfile(self._caminho):
-            return "arquivo"
-        if os.path.islink(self._caminho):
-            return "link simbólico"
-        return "desconhecido"
+        if not self.is_valid:
+            return PathType.INVALID
+
+        if self._resolved_path and self._resolved_path.is_dir():
+            return PathType.DIR
+        if self._resolved_path and self._resolved_path.is_file():
+            return PathType.FILE
+        if self._resolved_path and self._resolved_path.is_symlink():
+            return PathType.SYMLINK
+
+        return PathType.UNKNOWN
+
+    @property
+    def error(self) -> Optional[PathError]:
+        """Retorna o erro associado ao caminho, se houver."""
+        return self._error
 
     def to_dict(self) -> dict:
-        """
-        Retorna metadados do caminho como dicionário.
-
-        Returns:
-            dict: {
-                'caminho': str,
-                'tipo': str,
-                'existe': bool,
-                'permissao': bool,
-                'normalizado': str
-            }
-        """
-        return {
-            "caminho": self._caminho,
-            "tipo": self._determinar_tipo(),
-            "existe": os.path.exists(self._caminho),
-            "permissao": self._verificar_permissao(self._caminho),
-            "normalizado": os.path.abspath(self._caminho),
+        """Converte para dicionário com informações completas."""
+        base: dict = {
+            "raw_path": self.raw_path,
+            "is_valid": self.is_valid,
+            "type": self.type.value
         }
 
-    def to_json(self, indent: int = 4) -> str:
-        """
-        Retorna metadados do caminho como JSON formatado.
+        if self.is_valid:
+            base.update({
+                "resolved_path": str(self._resolved_path),
+                "permissions": {
+                    "readable": os.access(
+                        self._resolved_path, os.R_OK
+                    ) if self._resolved_path else False,
+                    "writable": os.access(
+                        self._resolved_path, os.W_OK
+                    ) if self._resolved_path else False
+                }
+            })
+        else:
+            base["error"] = {
+                "type": self._error.type if self._error else "Unknown",
+                "message": self._error.message if self._error else "Erro desconhecido"
+            }
 
-        Args:
-            indent: Número de espaços para indentação
-
-        Returns:
-            str: JSON formatado
-        """
-        return json.dumps(self.to_dict(), ensure_ascii=False, indent=indent)
-
-    def __repr__(self) -> str:
-        """Representação oficial do objeto."""
-        return f"Caminho(caminho={self._caminho!r})"
+        return base
 
     def __str__(self) -> str:
-        """Representação amigável do caminho."""
-        return self._caminho
-
-    def __eq__(self, other) -> bool:
-        """Compara dois objetos pelo caminho absoluto."""
-        return isinstance(other, Caminho) and self._caminho == other._caminho
+        return self.raw_path
 
 
-# Exemplo de uso
+# Exemplo de uso moderno
 if __name__ == "__main__":
-    try:
-        # Criação do objeto
-        caminho_obj = Caminho(".")  # Diretório atual
+    paths_to_test: list[Union[str, int, Path]] = [
+        "/caminho/válido/existente",  # Substitua por um caminho real
+        "/caminho/inválido",
+        Path.home() / "Downloads",
+        123  # Tipo inválido
+    ]
 
-        # Acessando propriedade
-        print(f"\nCaminho atual: {caminho_obj.caminho}")
+    for test_path in paths_to_test:
+        print(f"\nTesting: {test_path}")
+        caminho = Caminho(str(test_path))
 
-        # Atualizando caminho com setter
-        caminho_obj.caminho = ".."  # Diretório pai
-        print(f"\nNovo caminho: {caminho_obj.caminho}")
+        print(f"Valid: {caminho.is_valid}")
+        print(f"Type: {caminho.type.value}")
+        if caminho.error:
+            print(f"Error: {caminho.error.type} - {caminho.error.message}")
+        if caminho.is_valid:
+            print(f"Resolved: {caminho.path}")
+        else:
+            if not caminho.is_valid and caminho._error:
+                print(f"Error: {caminho._error.type} - {caminho._error.message}")
+            else:
+                print("No error or path is valid.")
 
-        # Saída em diferentes formatos
-        print("\nMetadados como dicionário:")
-        print(caminho_obj.to_dict())
-
-        print("\nMetadados como JSON:")
-        print(caminho_obj.to_json())
-
-        print("\nRepresentação do objeto:")
-        print(repr(caminho_obj))
-
-    except (TypeError, FileNotFoundError, PermissionError) as e:
-        print(f"\nErro: {e}")
+        print("JSON Representation:")
+        print(json.dumps(caminho.to_dict(), indent=2, ensure_ascii=False))
