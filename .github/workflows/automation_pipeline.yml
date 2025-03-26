@@ -142,9 +142,9 @@ jobs:
   #           exit 1
   #         fi
 
-  #         if [ -f artifacts/reports/coverage.xml ]; then
+  #         if [ -f coverage.xml ]; then
   #           echo "Relatório de Cobertura encontrado."
-  #           ls -l artifacts/reports/coverage.xml
+  #           ls -l coverage.xml
   #         else
   #           echo "Erro: coverage.xml não encontrado."
   #           exit 1

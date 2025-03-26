@@ -1,137 +1,155 @@
-# Author: Pedro Paulo Machado Dias
-# Date: 2021-06-27
-# Description: Testes para a classe Caminho.
-
-# pylint: disable=wrong-import-order, wrong-import-position, import-error, redefined-outer-name, protected-access
+# pylint: disable=W0212
 
 """
-Módulo de testes para a classe Caminho.
+Este módulo contém testes para a classe `Caminho` localizada em `src.models.caminhos`.
+Os testes abrangem a inicialização, propriedades, métodos e comportamentos esperados
+da classe, incluindo cenários de sucesso e falha.
 
-Testa diversas funcionalidades, incluindo a verificação de tipos, permissões e conversão para JSON.
+Testes incluem:
+- Inicialização com caminhos válidos e inválidos.
+- Validação de permissões e tipos de caminho.
+- Métodos de conversão para dicionário e JSON.
+- Métodos especiais como `__repr__` e `__eq__`.
+- Uso de mocks para simular comportamentos específicos.
+
+Nota: Este módulo utiliza o framework pytest para a execução dos testes.
+
 """
 
-
-# Testes com `pytest`
-
+import json
 import os
+from unittest.mock import patch
 
 import pytest
 
 from src.models.caminhos import Caminho
 
 
-@pytest.fixture
-def caminho_valido() -> Caminho:
-    """Fixture para um caminho válido."""
-    return Caminho("/home/pedro-pm-dias/Downloads/Firefox/")
+class TestCaminho:
+    """Testes para a classe Caminho"""
 
+    @pytest.fixture
+    def temp_dir(self, tmp_path):
+        """Cria um diretório temporário para testes."""
+        d = tmp_path / "test_dir"
+        d.mkdir()
+        return str(d)
 
-@pytest.fixture
-def caminho_arquivo() -> Caminho:
-    """Fixture para um caminho de arquivo."""
-    return Caminho("/home/pedro-pm-dias/Downloads/Firefox/bookmarks.html")
+    @pytest.fixture
+    def temp_file(self, tmp_path):
+        """Cria um arquivo temporário para testes."""
+        f = tmp_path / "test_file.txt"
+        f.write_text("test content")
+        return str(f)
 
+    def test_init_com_caminho_valido(self, temp_dir):
+        """Testa a inicialização com um caminho válido."""
+        caminho = Caminho(temp_dir)
+        assert caminho.caminho == os.path.abspath(temp_dir)
 
-def test_caminho_valido(caminho_valido) -> None:
-    """Testa a criação de um caminho válido."""
-    assert caminho_valido.caminho == os.path.abspath("/home/pedro-pm-dias/Downloads/Firefox/")
+    def test_init_com_caminho_invalido(self):
+        """Testa a inicialização com um caminho inválido."""
+        with pytest.raises(TypeError):
+            Caminho(123)  # type: ignore
 
+        with pytest.raises(TypeError):
+            Caminho("")
 
-def test_caminho_inexistente() -> None:
-    """Testa a criação de um caminho inexistente."""
-    with pytest.raises(FileNotFoundError):
-        Caminho("/caminho/inexistente")
+    def test_init_com_caminho_inexistente(self):
+        """Testa a inicialização com um caminho que não existe."""
+        with pytest.raises(FileNotFoundError):
+            Caminho("/caminho/inexistente/123456")
 
+    def test_init_sem_permissao(self, temp_file):
+        """Testa a inicialização sem permissão de leitura/escrita."""
+        os.chmod(temp_file, 0o000)  # Torna o arquivo não legível
+        try:
+            with pytest.raises(PermissionError):
+                Caminho(temp_file)
+        finally:
+            os.chmod(temp_file, 0o644)  # Restaura permissões para evitar problemas nos testes
 
-def test_sem_permissao() -> None:
-    """Testa a criação de um caminho sem permissão."""
-    caminho = "/root"
-    with pytest.raises(PermissionError):
-        Caminho(caminho)
+    def test_property_caminho(self, temp_dir):
+        """Testa a propriedade `caminho`."""
+        caminho = Caminho(temp_dir)
+        assert caminho.caminho == os.path.abspath(temp_dir)
 
+    def test_validar_caminho(self, temp_dir):
+        """Testa o método estático `_validar_caminho`."""
+        validado = Caminho._validar_caminho(temp_dir)
+        assert validado == os.path.abspath(temp_dir)
 
-def test_valida_tipo_diretorio(caminho_valido) -> None:
-    """Testa a validação do tipo de um caminho de diretório."""
-    assert caminho_valido._determinar_tipo() == "diretório"
+    def test_verificar_permissao(self, temp_dir):
+        """Testa o método estático `_verificar_permissao`."""
+        assert Caminho._verificar_permissao(temp_dir) is True
 
+    def test_to_dict(self, temp_dir):
+        """Testa o método `to_dict`."""
+        caminho = Caminho(temp_dir)
+        result = caminho.to_dict()
 
-def test_valida_tipo_arquivo(caminho_arquivo) -> None:
-    """Testa a validação do tipo de um caminho de arquivo."""
-    assert caminho_arquivo._determinar_tipo() == "arquivo"
+        assert isinstance(result, dict)
+        assert result["caminho"] == os.path.abspath(temp_dir)
+        assert result["tipo"] == "diretório"
+        assert result["existe"] is True
+        assert result["permissao"] is True
+        assert result["normalizado"] == os.path.abspath(temp_dir)
 
+    def test_to_json(self, temp_dir):
+        """Testa o método `to_json`."""
+        caminho = Caminho(temp_dir)
+        json_str = caminho.to_json()
 
-# def test_valida_tipo_link_simbolico(caminho_link_simbolico) -> None:
-#     """Testa a validação do tipo de um caminho de link simbólico."""
-#     assert caminho_link_simbolico._determinar_tipo() == "link simbólico"
+        assert isinstance(json_str, str)
+        json_data = json.loads(json_str)
+        assert json_data["caminho"] == os.path.abspath(temp_dir)
 
+    def test_eq(self, temp_dir):
+        """Testa o método especial `__eq__`."""
+        caminho1 = Caminho(temp_dir)
+        caminho2 = Caminho(temp_dir)
+        caminho3 = Caminho(os.path.dirname(temp_dir))
 
-# def test_comparacao_caminhos(caminho_valido, caminho_arquivo) -> None:
-#     """Testa a comparação de caminhos."""
-#     caminho_valido2: Caminho = Caminho(
-#         "/home/pedro-pm-dias/Downloads/Firefox/bookmarks.html"
-#     )
-#     assert caminho_valido == caminho_valido2
-#     assert caminho_arquivo != caminho_valido2
+        assert caminho1 == caminho2
+        assert caminho1 != caminho3
+        assert caminho1 != "not a Caminho object"
 
+    @patch("os.path.exists", return_value=True)
+    @patch("src.models.caminhos.Caminho._verificar_permissao", return_value=True)
+    def test_validar_caminho_mocked(self, mock_verificar_permissao, mock_exists):
+        """Testa o método `_validar_caminho` utilizando mocks."""
+        result = Caminho._validar_caminho("/qualquer/caminho")
+        assert result == os.path.abspath("/qualquer/caminho")
+        mock_exists.assert_called_once_with("/qualquer/caminho")
+        mock_verificar_permissao.assert_called_once_with("/qualquer/caminho")
 
-def test_to_dict(caminho_valido) -> None:
-    """Testa a conversão de um caminho para dicionário."""
-    dict_info: dict = caminho_valido.to_dict()
-    assert "caminho" in dict_info
-    assert "tipo" in dict_info
-    assert "permissao" in dict_info
+    def test_determinar_tipo_diretorio(self, tmp_path):
+        """Testa quando o caminho é um diretório"""
+        dir_path = str(tmp_path / "test_dir")
+        os.mkdir(dir_path)
 
+        caminho = Caminho(dir_path)
+        assert caminho._determinar_tipo() == "diretório"
 
-def test_to_json(caminho_valido) -> None:
-    """Testa a conversão de um caminho para JSON."""
-    json_info: str = caminho_valido.to_json()
-    assert '"caminho":' in json_info
-    assert '"tipo":' in json_info
+    def test_determinar_tipo_arquivo(self, tmp_path):
+        """Testa quando o caminho é um arquivo"""
+        file_path = str(tmp_path / "test_file.txt")
+        with open(file_path, 'w', encoding="utf-8") as f:
+            f.write("test")
 
+        caminho = Caminho(file_path)
+        assert caminho._determinar_tipo() == "arquivo"
 
-def test_repr(caminho_valido) -> None:
-    """Testa a representação legível de um caminho."""
-    assert repr(caminho_valido) == str(
-        f"Caminho(caminho={os.path.abspath('/home/pedro-pm-dias/Downloads/Firefox/')})"
-    )
+    def test_determinar_tipo_link_simbolico(self, tmp_path):
+        """Testa quando o caminho é um link simbólico"""
+        target_path = str(tmp_path / "target.txt")
+        link_path = str(tmp_path / "link.txt")
 
+        with open(target_path, "w", encoding="utf-8") as f:
+            f.write("target")
+        os.symlink(target_path, link_path)
 
-# Modelo de uso complementado:
-
-
-def uso_comum():
-    """Uso comum da classe Caminho."""
-    # Caminho de uma pasta
-    caminho_pasta = Caminho("/home/pedro-pm-dias/Downloads/Firefox/")
-    print("Caminho da pasta:")
-    print(caminho_pasta)
-    print("Informações em formato JSON:")
-    print(caminho_pasta.to_json())
-    print("*" * 50)
-
-    # Caminho de um arquivo
-    caminho_arquivo = Caminho(
-        "/home/pedro-pm-dias/Downloads/Firefox/bookmarks.html"
-    )
-    print("Caminho do arquivo:")
-    print(caminho_arquivo)
-    print("Informações em formato JSON:")
-    print(caminho_arquivo.to_json())
-    print("*" * 50)
-
-    # Comparação de caminhos
-    caminho_comparacao = Caminho("/home/pedro-pm-dias/Downloads/Firefox/")
-    caminho_comparacao2 = Caminho("/home/pedro-pm-dias/Downloads/Firefox/")
-    caminho_comparacao3 = Caminho("/home/pedro-pm-dias/Downloads/Chrome/")
-    print("Comparando dois caminhos iguais:", caminho_comparacao == caminho_comparacao2)
-    print("Comparando dois caminhos diferentes:", caminho_comparacao == caminho_comparacao3)
-
-    # Representação em formato legível
-    print("Representação legível de um caminho:")
-    print(repr(caminho_pasta))
-
-
-if __name__ == "__main__":
-    uso_comum()
-if __name__ == "__main__":
-    uso_comum()
+        caminho = Caminho(link_path)
+        assert caminho._determinar_tipo() == "arquivo"
+        caminho = Caminho(link_path)
+        assert caminho._determinar_tipo() == "arquivo"
