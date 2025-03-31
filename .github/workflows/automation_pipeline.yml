@@ -22,33 +22,29 @@ jobs:
       - name: Exibir estrutura do projeto
         run: |
           pwd
-          tree -L 3
+          ls -R
+          echo "Estrutura do projeto verificada"
 
   setup-python:
     name: Configurar Python
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: checkout
 
     steps:
       - name: Configurar Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Verificar versões do Python e Pip
+      - name: Verificar versões
         run: |
           python --version
           pip --version
 
-      - name: Configurar ambiente virtual e instalar dependências
+      - name: Instalar dependências básicas
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip freeze > requirements.txt
-          pip install -r requirements.txt
-          pip install pytest flake8 black mypy pylint coverage pytest-cov || echo "Erro ao instalar dependências"
-          echo "Dependências instaladas com sucesso"
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
 
   lint:
     name: Verificar Código (Linting)
@@ -56,63 +52,61 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Verificar formatação com Black
+      - uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Executar Linters
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          black --check . || echo "Erros de formatação encontrados"
-          flake8 . || echo "Erros de estilo encontrados"
-          mypy src/ || echo "Erros de tipagem encontrados"
-          pylint src/ || echo "Erros de estilo encontrados"
+          pip install black flake8 mypy pylint
+          black --check src/ tests/
+          flake8 src/ tests/
+          mypy src/
+          pylint src/
 
   test:
-    name: Executar Testes Unitários (Pytest)
+    name: Executar Testes Unitários
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: ['3.10']
     needs: setup-python
 
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Configurar Python
-        uses: actions/setup-python@v3
+      - name: Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Debug (Listar estrutura do projeto)
+      - name: Instalar dependências
         run: |
-          pwd
-          ls -R
-
-      - name: Configurar ambiente
-        shell: bash
-        run: |
-          python -m venv venv
-          if ([ "${{ runner.os }}" == "Windows" ]); then
-            source venv/Scripts/activate
-          else
-            source venv/bin/activate
-          fi
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install pytest pytest-cov
 
-      - name: Executar testes
+      - name: Executar testes (Windows)
+        if: runner.os == 'Windows'
         run: |
-          if ([ "${{ runner.os }}" == "Windows" ]); then
-            .\venv\Scripts\activate
-          else
-            source venv/bin/activate
-          fi
-          pytest tests/ --junitxml=report.xml --cov=src --cov-report=html --cov-report=term || echo "Testes falharam (mas a pipeline continua)"
+          python -m pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
 
-      - name: Debug (Listar estrutura do projeto)
+      - name: Executar testes (Unix)
+        if: runner.os != 'Windows'
         run: |
-          pwd
-          ls -R
-          echo "Estrutura do projeto listada com sucesso"
-          echo "OS: ${{ runner.os }}"
+          pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-${{ runner.os }}
+          path: |
+            coverage.xml
+            htmlcov/
 
   finalize:
     name: Finalizar Pipeline
@@ -122,5 +116,5 @@ jobs:
     steps:
       - name: Verificar Resultados
         run: |
-          echo "Linting e Testes concluídos com sucesso."
-          echo "Pipeline finalizado."
+          echo "Pipeline executada com sucesso em todos os sistemas operacionais"
+          echo "Linting e testes completados"
