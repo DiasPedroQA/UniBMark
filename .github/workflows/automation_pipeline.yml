@@ -93,7 +93,7 @@ jobs:
         run: |
           echo "Instalando dependências para testes"
           python -m pip install --upgrade pip
-          pp freeze > requirements.txt
+          pip freeze > requirements.txt
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
