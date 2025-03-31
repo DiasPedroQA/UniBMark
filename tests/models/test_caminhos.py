@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 # pylint: disable=missing-module-docstring
 
 from unittest.mock import MagicMock, patch
