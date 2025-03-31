@@ -16,11 +16,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Iniciando fase de checkout
+        run: echo "Iniciando fase de checkout do código"
+
       - name: Checkout do repositório
         uses: actions/checkout@v3
 
       - name: Exibir estrutura do projeto
         run: |
+          echo "Exibindo estrutura do projeto"
           pwd
           ls -R
           echo "Estrutura do projeto verificada"
@@ -31,6 +35,9 @@ jobs:
     needs: checkout
 
     steps:
+      - name: Iniciando configuração do Python
+        run: echo "Iniciando configuração do ambiente Python"
+
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
@@ -38,11 +45,13 @@ jobs:
 
       - name: Verificar versões
         run: |
+          echo "Verificando versões do Python e pip"
           python --version
           pip --version
 
       - name: Instalar dependências básicas
         run: |
+          echo "Instalando dependências básicas"
           python -m pip install --upgrade pip
           pip install pytest pytest-cov
 
@@ -52,6 +61,9 @@ jobs:
     needs: setup-python
 
     steps:
+      - name: Iniciando fase de linting
+        run: echo "Iniciando verificação de código (Linting)"
+
       - uses: actions/checkout@v3
 
       - name: Configurar Python
@@ -61,6 +73,7 @@ jobs:
 
       - name: Verificar Código (Linting)
         run: |
+          echo "Executando ferramentas de linting"
           python -m pip install --upgrade pip
           black --check src/ tests/ || true
           flake8 src/ tests/ || true
@@ -77,6 +90,9 @@ jobs:
     needs: setup-python
 
     steps:
+      - name: Iniciando fase de testes
+        run: echo "Iniciando execução de testes unitários em ${{ matrix.os }}"
+
       - uses: actions/checkout@v3
 
       - name: Configurar Python ${{ matrix.python-version }}
@@ -86,6 +102,7 @@ jobs:
 
       - name: Instalar dependências
         run: |
+          echo "Instalando dependências para testes"
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov
@@ -93,11 +110,13 @@ jobs:
       - name: Executar testes (Windows)
         if: runner.os == 'Windows'
         run: |
+          echo "Executando testes no Windows"
           python -m pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
 
       - name: Executar testes (Unix)
         if: runner.os != 'Windows'
         run: |
+          echo "Executando testes em sistemas Unix"
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
 
       - name: Upload coverage report
@@ -114,6 +133,9 @@ jobs:
     needs: [lint, test]
 
     steps:
+      - name: Iniciando fase de finalização
+        run: echo "Iniciando fase de finalização da pipeline"
+
       - name: Verificar Resultados
         run: |
           echo "Pipeline executada com sucesso em todos os sistemas operacionais"

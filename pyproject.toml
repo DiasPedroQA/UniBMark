@@ -1,61 +1,66 @@
+# Configurações do sistema de build
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools>=42", "wheel"]  # Dependências necessárias para o sistema de build
+build-backend = "setuptools.build_meta"  # Backend utilizado para o build
 
+# Informações do projeto
 [project]
-name = "unibmark"
-version = "0.1.0"
-description = "Sistema de gerenciamento de bookmarks universitários"
+name = "unibmark"  # Nome do projeto
+version = "0.1.0"  # Versão do projeto
+description = "Sistema de gerenciamento de bookmarks de navegadores"  # Descrição do projeto
 authors = [
-    {name = "Pedro Dias", email = "seu@email.com"},
+    {name = "Pedro Dias", email = "diaspedro.dev@gmail.com"},  # Autor(es) do projeto
 ]
-readme = "README.md"
-requires-python = ">=3.10"
-license = {text = "MIT"}
+readme = "README.md"  # Arquivo de documentação principal
+requires-python = ">=3.10"  # Versão mínima do Python necessária
+license = {text = "MIT"}  # Licença do projeto
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Education",
-    "Programming Language :: Python :: 3.10",
+    "Development Status :: 3 - Alpha",  # Status de desenvolvimento
+    "Intended Audience :: Education",  # Público-alvo
+    "Programming Language :: Python :: 3.10",  # Versões do Python suportadas
     "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "flask>=2.0",
-    "sqlalchemy>=1.4",
+    "flask>=2.0",  # Dependência principal: Flask
+    "sqlalchemy>=1.4",  # Dependência principal: SQLAlchemy
     # Adicione outras dependências principais aqui
 ]
 
+# Dependências opcionais do projeto
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
-    "pytest-cov>=3.0",
-    "black>=22.0",
-    "flake8>=4.0",
-    "mypy>=0.900",
-    "pylint>=2.0",
-    "faker>=15.0",
+    "pytest>=7.0",  # Framework de testes
+    "pytest-cov>=3.0",  # Cobertura de testes
+    "black>=22.0",  # Formatação de código
+    "flake8>=4.0",  # Análise estática de código
+    "mypy>=0.900",  # Verificação de tipos
+    "pylint>=2.0",  # Ferramenta de linting
+    "faker>=15.0",  # Geração de dados fictícios
 ]
 
+# Configurações do pytest
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
+testpaths = ["tests"]  # Diretório onde os testes estão localizados
+python_files = "test_*.py"  # Padrão para arquivos de teste
+python_classes = "Test*"  # Padrão para classes de teste
+python_functions = "test_*"  # Padrão para funções de teste
 addopts = [
-    "--cov=src",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--junitxml=report.xml",
-    "--verbose",
+    "--cov=src",  # Cobertura de código para o diretório "src"
+    "--cov-report=term-missing",  # Relatório de cobertura no terminal
+    "--cov-report=html",  # Relatório de cobertura em HTML
+    "--junitxml=report.xml",  # Relatório de testes em formato XML
+    "--verbose",  # Saída detalhada dos testes
 ]
 filterwarnings = [
-    "error",
-    "ignore::DeprecationWarning",
+    "error",  # Tratar warnings como erros
+    "ignore::DeprecationWarning",  # Ignorar warnings de depreciação
 ]
 
+# Configurações do Black (formatação de código)
 [tool.black]
-line-length = 100
-target-version = ["py310"]
-include = '\.pyi?$'
+line-length = 100  # Comprimento máximo de linha
+target-version = ["py310"]  # Versão alvo do Python
+include = '\.pyi?$'  # Arquivos incluídos
 exclude = '''
 /(
     \.git
@@ -63,23 +68,25 @@ exclude = '''
   | venv
   | build
   | dist
-)/
+)/  # Arquivos/diretórios excluídos
 '''
 
+# Configurações do isort (organização de imports)
 [tool.isort]
-profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-line_length = 88
-known_first_party = ["unibmark"]
+profile = "black"  # Perfil de formatação compatível com Black
+multi_line_output = 3  # Estilo de saída para múltiplas linhas
+include_trailing_comma = true  # Incluir vírgula no final de listas
+force_grid_wrap = 0  # Configuração de quebra de linha
+line_length = 100  # Comprimento máximo de linha
+known_first_party = ["unibmark"]  # Pacotes considerados de primeira parte
 
+# Configurações do Flake8 (análise estática de código)
 [tool.flake8]
-max-line-length = 100
-extend-ignore = "E203"
-max-complexity = 18
+max-line-length = 100  # Comprimento máximo de linha
+extend-ignore = "E203"  # Ignorar regra específica
+max-complexity = 18  # Complexidade máxima permitida
 exclude = [
-    ".git",
+    ".git",  # Diretórios excluídos
     "__pycache__",
     ".venv",
     "venv",
@@ -88,34 +95,33 @@ exclude = [
     "migrations",
 ]
 
+# Configurações do MyPy (verificação de tipos)
 [tool.mypy]
-python_version = "3.10"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-check_untyped_defs = true
-no_implicit_optional = true
-strict_equality = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-disallow_incomplete_defs = true
+python_version = "3.10"  # Versão do Python
+warn_return_any = true  # Avisar sobre retornos do tipo "Any"
+warn_unused_configs = true  # Avisar sobre configurações não utilizadas
+disallow_untyped_defs = true  # Proibir definições sem tipos
+check_untyped_defs = true  # Verificar definições sem tipos
+no_implicit_optional = true  # Proibir uso implícito de "Optional"
+strict_equality = true  # Verificação estrita de igualdade
+warn_redundant_casts = true  # Avisar sobre casts redundantes
+warn_unused_ignores = true  # Avisar sobre "ignores" não utilizados
+warn_no_return = true  # Avisar sobre funções sem retorno
+disallow_incomplete_defs = true  # Proibir definições incompletas
 
+# Configurações do Pylint (análise estática de código)
 [tool.pylint.MASTER]
-load-plugins = "pylint_flask"
+load-plugins = "pylint_flask"  # Plugin para suporte ao Flask
 
 [tool.pylint.BASIC]
-good-names = ["app", "db", "api"]
+good-names = ["app", "db", "api"]  # Nomes de variáveis considerados bons
 
 [tool.pylint.FORMAT]
-max-line-length = 100
+max-line-length = 100  # Comprimento máximo de linha
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
-    "missing-docstring",
-    "too-few-public-methods",
-    "import-error",
+    "missing-docstring",  # Desabilitar aviso de docstring ausente
+    "too-few-public-methods",  # Desabilitar aviso de poucas funções públicas
+    "import-error",  # Desabilitar aviso de erro de importação
 ]
-
-[mypy]
-ignore_missing_imports = True
