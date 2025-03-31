@@ -1,125 +1,173 @@
-# pylint: disable=C0114, C0115, C0116
+# pylint: disable=missing-module-docstring
 
-import hashlib
-import platform
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.models.caminhos import ValidadorCaminho  # Substitua pelo seu módulo
-
-# Configuração para testes multiplataforma
-SISTEMA = platform.system()
-IS_WINDOWS = SISTEMA == "Windows"
-IS_LINUX = SISTEMA == "Linux"
-IS_MAC = SISTEMA == "Darwin"
+from models.path_validator import PathValidator
 
 
-# --------------------------------------------------
-# 1. Validação + Classificação + Feedback
-# --------------------------------------------------
-class TestValidacaoClassificacao:
-    @pytest.mark.parametrize("caminho, esperado", [
-        # Windows
-        pytest.param("C:\\Users\\file.txt", True, marks=pytest.mark.windows),
-        pytest.param("C:\\Users\\*?.txt", False, marks=pytest.mark.windows),
+# ========================
+# Testes de Validação de Caminho
+# ========================
+class TestPathValidation:
+    @pytest.mark.parametrize(
+        "input_path, expected",
+        [
+            ("/home/user/file.txt", True),
+            ("C:\\Users\\file.txt", True),
+            ("invalid:/path", False),
+            ("", False),
+        ],
+    )
+    def test_validate_path_syntax(self, input_path: str, expected: bool) -> None:
+        validator = PathValidator().set_path(input_path)
+        assert validator.is_valid() == expected
 
-        # Linux/macOS
-        pytest.param("/home/user/file.txt", True, marks=pytest.mark.linux_mac),
-        pytest.param("/home/user/\0file", False, marks=pytest.mark.linux_mac),
-
-        # Multiplataforma
-        ("./relativo/../file", True),
-        ("", False)
-    ])
-    def test_valida_sintaxe(self, caminho, esperado):
-        assert ValidadorCaminho(caminho).eh_valido() == esperado
-
-    def test_classificacao_tipo(self, tmp_path):
-        # Cria arquivo e pasta temporários
-        arquivo = tmp_path / "teste.txt"
-        arquivo.write_text("")
-        pasta = tmp_path / "subpasta"
-        pasta.mkdir()
-
-        val_arquivo = ValidadorCaminho(str(arquivo))
-        val_pasta = ValidadorCaminho(str(pasta))
-
-        assert val_arquivo.eh_arquivo()
-        assert val_pasta.eh_pasta()
+    @pytest.mark.parametrize(
+        "input_path, expected",
+        [
+            ("/home/user/file.txt", True),
+            ("C:\\Users\\file.txt", True),
+            ("file.txt", False),
+            ("./file.txt", False),
+        ],
+    )
+    def test_is_absolute(self, input_path: str, expected: bool) -> None:
+        validator = PathValidator().set_path(input_path)
+        assert validator.is_absolute() == expected
 
 
-# --------------------------------------------------
-# 2. Normalização + Segurança + Operações
-# --------------------------------------------------
-class TestNormalizacaoSeguranca:
-    @pytest.mark.parametrize("caminho, esperado", [
-        # Windows
-        pytest.param(
-            "C:\\Users\\..\\Windows",
-            "C:/Windows" if IS_WINDOWS else "/mnt/c/Windows",
-            marks=pytest.mark.windows
-        ),
+# ========================
+# Testes de Existência e Tipo do Caminho
+# ========================
+class TestPathExistenceAndType:
+    @patch("pathlib.Path.exists", return_value=True)
+    def test_exists(self) -> None:
+        validator = PathValidator().set_path("/home/user/file.txt")
+        assert validator.exists() is True
 
-        # Linux/macOS
-        pytest.param(
-            "/tmp//pasta/../file",
-            "/tmp/file",
-            marks=pytest.mark.linux_mac
-        )
-    ])
-    def test_normalizacao(self, caminho, esperado):
-        assert ValidadorCaminho(caminho).normalizar() == esperado
+    @patch("pathlib.Path.exists", return_value=False)
+    def test_not_exists(self) -> None:
+        validator = PathValidator().set_path("/home/user/file.txt")
+        assert validator.exists() is False
 
-    def test_path_traversal(self):
-        validador = ValidadorCaminho("../../../etc/passwd")
-        assert not validador.evitar_path_injection()
-
-
-# --------------------------------------------------
-# 3. Existência + Sugestões + Criação
-# --------------------------------------------------
-class TestSugestoesCriacao:
-    def test_sugestao_caminho(self, mocker):
-        mocker.patch("os.listdir", return_value=["documentos", "imagens"])
-        sugestoes = ValidadorCaminho(
-            "/home/user/documentos"
-        ).sugerir_alternativas()
-        assert "documentos" in sugestoes
-
-    def test_criacao_automatica(self, tmp_path):
-        caminho = tmp_path / "novo_arquivo.txt"
-        validador = ValidadorCaminho(str(caminho))
-        validador.criar_se_nao_existir(como_arquivo=True)
-        assert caminho.exists()
+    @pytest.mark.parametrize(
+        "is_file, is_dir, expected",
+        [(True, False, "file"), (False, True, "dir"), (False, False, "none")],
+    )
+    def test_get_type(self, is_file: bool, is_dir: bool, expected: str) -> None:
+        with patch("pathlib.Path.is_file", return_value=is_file), patch(
+            "pathlib.Path.is_dir", return_value=is_dir
+        ):
+            validator = PathValidator().set_path("/home/user/something")
+            assert validator.get_type() == expected
 
 
-# --------------------------------------------------
-# 4. Metadados + Comparação + Hash
-# --------------------------------------------------
-class TestMetadadosHash:
-    def test_metadados_arquivo(self):
-        validador = ValidadorCaminho("/home/user/arquivo.txt")
-        assert validador.extrair_nome_arquivo() == "arquivo.txt"
-        assert validador.extrair_extensao() == ".txt"
+# ========================
+# Testes de Propriedades do Caminho
+# ========================
+class TestPathProperties:
+    @patch("pathlib.Path.stat")
+    def test_get_size(self, mock_stat: MagicMock) -> None:
+        mock_stat.return_value.st_size = 1024
+        validator = PathValidator().set_path("/home/user/file.txt")
+        assert validator.get_size() == 1024
 
-    def test_hash_arquivo(self, tmp_path):
-        arquivo = tmp_path / "teste_hash.txt"
-        arquivo.write_text("conteúdo")
-        hash_esperado = hashlib.md5("conteúdo".encode()).hexdigest()
-        assert ValidadorCaminho(str(arquivo)).gerar_hash() == hash_esperado
+    @patch("pathlib.Path.stat")
+    def test_get_permissions(self, mock_stat: MagicMock) -> None:
+        mock_stat.return_value.st_mode = 0o777  # Permissões totais
+        validator = PathValidator().set_path("/home/user/file.txt")
+        assert validator.get_permissions() == {"read": True, "write": True, "execute": True}
 
 
-# --------------------------------------------------
-# 5. Segurança + Validação + Feedback
-# --------------------------------------------------
-class TestSeguranca:
-    @pytest.mark.skipif(not IS_LINUX, reason="Requer Linux")
-    def test_permissao_negada_linux(self):
-        validador = ValidadorCaminho("/root/")
-        assert not validador.validar_permissoes()
+# ========================
+# Testes da Classe PathValidator
+# ========================
+class TestPathValidator:
+    def test_set_path(self) -> None:
+        validator = PathValidator()
+        validator.set_path("/home/user/file.txt")
+        assert str(validator.path) == "/home/user/file.txt"
 
-    def test_log_tentativa_invalida(self, mocker):
-        mock_log = mocker.patch("seu_modulo.log_seguranca")
-        ValidadorCaminho("/invalid/path*").validar()
-        assert mock_log.called
-        assert mock_log.called
+    def test_is_valid_with_valid_path(self) -> None:
+        validator = PathValidator("/home/user/file.txt")
+        assert validator.is_valid() is True
+
+    @patch("pathlib.Path.resolve", side_effect=OSError)
+    def test_is_valid_with_invalid_path(self) -> None:
+        validator = PathValidator("/invalid:/path")
+        assert validator.is_valid() is False
+
+    def test_exists_with_existing_path(self) -> None:
+        with patch("pathlib.Path.exists", return_value=True):
+            validator = PathValidator("/home/user/file.txt")
+            assert validator.exists() is True
+
+    def test_exists_with_non_existing_path(self) -> None:
+        with patch("pathlib.Path.exists", return_value=False):
+            validator = PathValidator("/home/user/file.txt")
+            assert validator.exists() is False
+
+    def test_is_absolute_with_absolute_path(self) -> None:
+        validator = PathValidator("/home/user/file.txt")
+        assert validator.is_absolute() is True
+
+    def test_is_absolute_with_relative_path(self) -> None:
+        validator = PathValidator("file.txt")
+        assert validator.is_absolute() is False
+
+    def test_get_type_with_file(self) -> None:
+        with patch("pathlib.Path.is_file", return_value=True), patch(
+            "pathlib.Path.is_dir", return_value=False
+        ):
+            validator = PathValidator("/home/user/file.txt")
+            assert validator.get_type() == "file"
+
+    def test_get_type_with_directory(self) -> None:
+        with patch("pathlib.Path.is_file", return_value=False), patch(
+            "pathlib.Path.is_dir", return_value=True
+        ):
+            validator = PathValidator("/home/user/dir")
+            assert validator.get_type() == "dir"
+
+    def test_get_type_with_none(self) -> None:
+        with patch("pathlib.Path.is_file", return_value=False), patch(
+            "pathlib.Path.is_dir", return_value=False
+        ):
+            validator = PathValidator("/home/user/none")
+            assert validator.get_type() == "none"
+
+    def test_get_size_with_existing_file(self) -> None:
+        with patch("pathlib.Path.exists", return_value=True), patch(
+            "pathlib.Path.is_file", return_value=True
+        ), patch("pathlib.Path.stat") as mock_stat:
+            mock_stat.return_value.st_size = 2048
+            validator = PathValidator("/home/user/file.txt")
+            assert validator.get_size() == 2048
+
+    def test_get_size_with_non_existing_file(self) -> None:
+        with patch("pathlib.Path.exists", return_value=False):
+            validator = PathValidator("/home/user/file.txt")
+            assert validator.get_size() == 0
+
+    def test_get_permissions_with_existing_path(self) -> None:
+        with patch("pathlib.Path.exists", return_value=True), patch(
+            "pathlib.Path.stat"
+        ) as mock_stat:
+            mock_stat.return_value.st_mode = 0o777
+            validator = PathValidator("/home/user/file.txt")
+            assert validator.get_permissions() == {
+                "read": True,
+                "write": True,
+                "execute": True,
+            }
+
+    def test_get_permissions_with_non_existing_path(self) -> None:
+        with patch("pathlib.Path.exists", return_value=False):
+            validator = PathValidator("/home/user/file.txt")
+            assert validator.get_permissions() == {
+                "read": False,
+                "write": False,
+                "execute": False,
+            }
