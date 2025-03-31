@@ -30,9 +30,6 @@ jobs:
     needs: checkout
 
     steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v3
-
       - name: Configurar Python
         uses: actions/setup-python@v3
         with:
@@ -52,12 +49,6 @@ jobs:
           pip install pytest flake8 black mypy pylint coverage pytest-cov || echo "Erro ao instalar dependências"
           echo "Dependências instaladas com sucesso"
 
-      - name: Validar dependências instaladas
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip freeze
-
   lint:
     name: Verificar Código (Linting)
     runs-on: ubuntu-latest
@@ -75,13 +66,13 @@ jobs:
 
   test:
     name: Executar Testes Unitários (Pytest)
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
     needs: setup-python
 
     steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v3
-
       - name: Configurar ambiente virtual e instalar dependências
         run: |
           python -m venv venv
@@ -94,58 +85,15 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=term
+          pytest tests/ --junitxml=report.xml --cov=src --cov-report=html --cov-report=term
 
-      - name: Verificar a existência do arquivo de relatório
+  finalize:
+    name: Finalizar Pipeline
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    steps:
+      - name: Verificar Resultados
         run: |
-          if [ ! -f report.xml ]; then
-            echo "Erro: report.xml não foi gerado."
-            exit 1
-          fi
-          if [ ! -f coverage.xml ]; then
-            echo "Erro: coverage.xml não foi gerado."
-            exit 1
-          fi
-
-      - name: Armazenar Relatório Localmente
-        run: |
-          mkdir -p artifacts/reports
-          mv report.xml artifacts/reports/
-          mv coverage.xml artifacts/reports/
-
-  # post-deployment:
-  #   name: Pós-Implantação (Verificações Finais)
-  #   runs-on: ubuntu-latest
-  #   needs: test
-
-  #   steps:
-  #     - name: Verificar a versão do Python novamente após os testes
-  #       run: |
-  #         python --version
-
-  #     - name: Realizar verificações de permissões e integridade
-  #       run: |
-  #         # Garantir que o diretório 'artifacts/reports' exista
-  #         mkdir -p artifacts/reports
-
-  #         # Verificar as permissões da pasta do ambiente virtual
-  #         python -m venv venv
-  #         source venv/bin/activate
-  #         ls -ld venv
-
-  #         # Verificar se os arquivos de relatório existem
-  #         if [ -f artifacts/reports/report.xml ]; then
-  #           echo "Relatório de Testes encontrado."
-  #           ls -l artifacts/reports/report.xml
-  #         else
-  #           echo "Erro: report.xml não encontrado."
-  #           exit 1
-  #         fi
-
-  #         if [ -f coverage.xml ]; then
-  #           echo "Relatório de Cobertura encontrado."
-  #           ls -l coverage.xml
-  #         else
-  #           echo "Erro: coverage.xml não encontrado."
-  #           exit 1
-  #         fi
+          echo "Linting e Testes concluídos com sucesso."
+          echo "Pipeline finalizado."

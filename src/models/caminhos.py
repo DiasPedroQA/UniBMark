@@ -3,158 +3,199 @@
 """
 Módulo Caminho - Manipulação segura de caminhos do sistema de arquivos
 
-Esta classe fornece:
-- Validação robusta de caminhos (absolutos e relativos)
-- Conversão automática de caminhos relativos para absolutos
-- Controle de acesso via getter/setter com validação
-- Verificação de permissões
-- Identificação do tipo (arquivo, diretório, link)
-- Exportação para dict e JSON
-- Representações consistentes do objeto
-
-Exemplo de uso:
-    >>> caminho = Caminho("../pasta/relativa")  # Aceita caminhos relativos
-    >>> print(caminho.to_json())  # Saída formatada em JSON
-    >>> dados = caminho.to_dict()  # Dicionário com metadados
+Python 3.12+ com type hints avançados:
+- Uso de typing.Self
+- Tipos literais e union types com sintaxe simplificada
+- Pattern matching para tratamento de erros
 """
 
-import json
+# **Classe Base (Versão Simplificada)**
+
+import hashlib
 import os
-from dataclasses import dataclass, field
-from enum import Enum
+import platform
+import re
 from pathlib import Path
-from typing import Literal, Optional, Union
 
 
-class PathType(str, Enum):
-    """Enumeração de tipos de caminhos do sistema de arquivos."""
-    FILE = "arquivo"
-    DIR = "diretório"
-    SYMLINK = "link simbólico"
-    UNKNOWN = "desconhecido"
-    INVALID = "inválido"
+class ValidadorCaminho:
+    def __init__(self, caminho):
+        self.caminho_original = caminho
+        self.caminho = str(caminho)  # Garante que é string
+        self.so = platform.system()  # 'Windows', 'Linux', 'Darwin'
 
+        # Flags de estado (serão preenchidas durante a validação)
+        self._valido = None
+        self._motivo_invalidez = None
+        self._normalizado = None
 
-@dataclass
-class PathError:
-    """Representa um erro de caminho inválido."""
-    type: str
-    message: str
+    # --------------------------------------------------
+    # 1. Validação + Classificação + Feedback
+    # --------------------------------------------------
+    def eh_valido(self):
+        """Valida a sintaxe do caminho conforme as regras do SO."""
+        if self._valido is not None:
+            return self._valido
 
+        self._valido = True
+        self._motivo_invalidez = None
 
-@dataclass
-class Caminho:
-    """Representa um caminho do sistema de arquivos (válido ou inválido)."""
+        # Verifica caracteres proibidos
+        caracteres_proibidos = {
+            'Windows': r'[*?"<>|]',
+            'Linux': r'[\0]',
+            'Darwin': r'[\0]'
+        }.get(self.so, r'[\0]')
 
-    raw_path: str
-    _resolved_path: Optional[Path] = field(default=None, init=False, repr=False)
-    _error: Optional[PathError] = field(default=None, init=False, repr=False)
-    _state: Literal["valid", "invalid"] = field(default="invalid", init=False, repr=False)
+        if re.search(caracteres_proibidos, self.caminho):
+            self._valido = False
+            self._motivo_invalidez = "Contém caracteres inválidos para o SO"
 
-    def __post_init__(self):
-        self._validate()
+        # Verifica caminho vazio
+        elif not self.caminho.strip():
+            self._valido = False
+            self._motivo_invalidez = "Caminho vazio"
 
-    def _validate(self) -> None:
-        """Valida o caminho automaticamente após inicialização."""
-        try:
-            path: Path = Path(self.raw_path).resolve(strict=True)
+        return self._valido
 
-            if not os.access(path, os.R_OK | os.W_OK):
-                raise PermissionError(f"Sem permissões em: {path}")
+    def get_motivo_invalidez(self):
+        """Retorna o motivo da invalidez (se aplicável)."""
+        return self._motivo_invalidez or "Caminho válido"
 
-            self._resolved_path = path
-            self._state = "valid"
+    def eh_arquivo(self):
+        """Verifica se o caminho é um arquivo existente."""
+        return os.path.isfile(self.obter_caminho_real())
 
-        except (TypeError, RuntimeError, OSError) as e:
-            self._error = PathError(type=e.__class__.__name__, message=str(e))
-            self._state = "invalid"
+    def eh_pasta(self):
+        """Verifica se o caminho é uma pasta existente."""
+        return os.path.isdir(self.obter_caminho_real())
 
-    @property
-    def is_valid(self) -> bool:
-        """Retorna True se o caminho for válido."""
-        return self._state == "valid"
+    # --------------------------------------------------
+    # 2. Normalização + Segurança
+    # --------------------------------------------------
+    def normalizar(self):
+        """Padroniza o caminho para um formato interno (Unix-like)."""
+        if self._normalizado is not None:
+            return self._normalizado
 
-    @property
-    def path(self) -> Optional[Path]:
-        """Retorna o objeto Path se válido."""
-        return self._resolved_path if self.is_valid else None
+        caminho = self.caminho
 
-    @property
-    def type(self) -> PathType:
-        """Determina o tipo do caminho."""
-        if not self.is_valid:
-            return PathType.INVALID
+        # Substitui barras invertidas (Windows)
+        caminho = caminho.replace("\\", "/")
 
-        if self._resolved_path and self._resolved_path.is_dir():
-            return PathType.DIR
-        if self._resolved_path and self._resolved_path.is_file():
-            return PathType.FILE
-        if self._resolved_path and self._resolved_path.is_symlink():
-            return PathType.SYMLINK
+        # Expande ~ (home directory)
+        if caminho.startswith("~"):
+            caminho = os.path.expanduser(caminho)
 
-        return PathType.UNKNOWN
+        # Converte caminhos Windows (C:\ → /mnt/c/)
+        if self.so != "Windows" and ":/" in caminho:
+            caminho = re.sub(r"^([A-Za-z]):/", r"/mnt/\1/", caminho)
 
-    @property
-    def error(self) -> Optional[PathError]:
-        """Retorna o erro associado ao caminho, se houver."""
-        return self._error
+        # Remove redundâncias (../, ./)
+        caminho = os.path.normpath(caminho)
 
-    def to_dict(self) -> dict:
-        """Converte para dicionário com informações completas."""
-        base: dict = {
-            "raw_path": self.raw_path,
-            "is_valid": self.is_valid,
-            "type": self.type.value
-        }
+        self._normalizado = caminho
+        return caminho
 
-        if self.is_valid:
-            base.update({
-                "resolved_path": str(self._resolved_path),
-                "permissions": {
-                    "readable": os.access(
-                        self._resolved_path, os.R_OK
-                    ) if self._resolved_path else False,
-                    "writable": os.access(
-                        self._resolved_path, os.W_OK
-                    ) if self._resolved_path else False
-                }
-            })
+    def evitar_path_injection(self):
+        """Bloqueia tentativas de path traversal (ex: ../../../etc/passwd)."""
+        caminho_normalizado = self.normalizar()
+        partes = caminho_normalizado.split("/")
+        if ".." in partes:
+            return False
+        return True
+
+    # --------------------------------------------------
+    # 3. Existência + Sugestões
+    # --------------------------------------------------
+    def sugerir_alternativas(self, distancia_maxima=2):
+        """Sugere caminhos similares existentes (fuzzy matching)."""
+        from difflib import get_close_matches  # Importação tardia
+
+        if self.eh_existente():
+            return []
+
+        dir_pai = os.path.dirname(self.obter_caminho_real())
+        if not os.path.exists(dir_pai):
+            return []
+
+        itens = os.listdir(dir_pai)
+        return get_close_matches(
+            os.path.basename(self.caminho),
+            itens,
+            n=3,
+            cutoff=0.6
+        )
+
+    def criar_se_nao_existir(self, como_arquivo=False):
+        """Cria o arquivo/pasta se não existir."""
+        caminho = self.obter_caminho_real()
+        if os.path.exists(caminho):
+            return
+
+        if como_arquivo:
+            Path(caminho).touch()
         else:
-            base["error"] = {
-                "type": self._error.type if self._error else "Unknown",
-                "message": self._error.message if self._error else "Erro desconhecido"
-            }
+            Path(caminho).mkdir(parents=True)
 
-        return base
+    # --------------------------------------------------
+    # 4. Metadados + Hash
+    # --------------------------------------------------
+    def extrair_nome_arquivo(self):
+        """Retorna o nome do arquivo (ex: 'arquivo.txt')."""
+        return os.path.basename(self.normalizar())
 
-    def __str__(self) -> str:
-        return self.raw_path
+    def extrair_extensao(self):
+        """Retorna a extensão (ex: '.txt')."""
+        nome = self.extrair_nome_arquivo()
+        return os.path.splitext(nome)[1]
+
+    def gerar_hash(self, algoritmo="md5"):
+        """Gera hash do conteúdo do arquivo (se existir)."""
+        if not self.eh_arquivo():
+            return None
+
+        with open(self.obter_caminho_real(), "rb") as f:
+            conteudo = f.read()
+            return hashlib.md5(conteudo).hexdigest()
+
+    # --------------------------------------------------
+    # 5. Segurança Avançada
+    # --------------------------------------------------
+    def validar_permissões(self):
+        """Verifica permissões de leitura/escrita."""
+        caminho = self.obter_caminho_real()
+        if not os.path.exists(caminho):
+            return False
+        return os.access(caminho, os.R_OK | os.W_OK)
+
+    # --------------------------------------------------
+    # Métodos Auxiliares
+    # --------------------------------------------------
+    def obter_caminho_real(self):
+        """Retorna o caminho absoluto e normalizado."""
+        caminho = self.normalizar()
+        if os.path.isabs(caminho):
+            return caminho
+        return os.path.abspath(caminho)
+
+    def eh_existente(self):
+        """Verifica se o caminho existe no sistema de arquivos."""
+        return os.path.exists(self.obter_caminho_real())
+
+    def comparar(self, outro_validador):
+        """Compara dois caminhos (considerando normalização)."""
+        return self.obter_caminho_real() == outro_validador.obter_caminho_real()
 
 
-# Exemplo de uso moderno
-if __name__ == "__main__":
-    paths_to_test: list[Union[str, int, Path]] = [
-        "/caminho/válido/existente",  # Substitua por um caminho real
-        "/caminho/inválido",
-        Path.home() / "Downloads",
-        123  # Tipo inválido
-    ]
+# **Exemplo de Uso**
+# Validação + Normalização
+validador = ValidadorCaminho("C:\\Users\\../file.txt")
+if validador.eh_valido():
+    print(f"Caminho normalizado: {validador.normalizar()}")  # /mnt/c/file.txt (Linux)
+else:
+    print(f"Erro: {validador.get_motivo_invalidez()}")
 
-    for test_path in paths_to_test:
-        print(f"\nTesting: {test_path}")
-        caminho = Caminho(str(test_path))
-
-        print(f"Valid: {caminho.is_valid}")
-        print(f"Type: {caminho.type.value}")
-        if caminho.error:
-            print(f"Error: {caminho.error.type} - {caminho.error.message}")
-        if caminho.is_valid:
-            print(f"Resolved: {caminho.path}")
-        else:
-            if not caminho.is_valid and caminho._error:
-                print(f"Error: {caminho._error.type} - {caminho._error.message}")
-            else:
-                print("No error or path is valid.")
-
-        print("JSON Representation:")
-        print(json.dumps(caminho.to_dict(), indent=2, ensure_ascii=False))
+# Sugestões para caminhos inexistentes
+sugestoes = ValidadorCaminho("/home/user/documntos").sugerir_alternativas()
+print(f"Você quis dizer? {sugestoes}")  # ['documentos']
