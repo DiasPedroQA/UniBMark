@@ -14,6 +14,8 @@ jobs:
   checkout:
     name: Checkout do Código
     runs-on: ubuntu-latest
+    outputs:
+      python-version: '3.10'
 
     steps:
       - name: Iniciando fase de checkout
@@ -30,18 +32,18 @@ jobs:
           echo "Estrutura do projeto verificada"
 
   setup-python:
-    name: Configurar Python
+    name: Configurar Python e Instalar Dependências
     runs-on: ubuntu-latest
     needs: checkout
 
     steps:
-      - name: Iniciando configuração do Python
+      - name: Iniciando configuração do ambiente Python
         run: echo "Iniciando configuração do ambiente Python"
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: ${{ needs.checkout.outputs.python-version }}
 
       - name: Verificar versões
         run: |
@@ -53,6 +55,7 @@ jobs:
         run: |
           echo "Instalando dependências básicas"
           python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install pytest pytest-cov
 
   lint:
@@ -64,17 +67,9 @@ jobs:
       - name: Iniciando fase de linting
         run: echo "Iniciando verificação de código (Linting)"
 
-      - uses: actions/checkout@v4
-
-      - name: Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
       - name: Verificar Código (Linting)
         run: |
           echo "Executando ferramentas de linting"
-          python -m pip install --upgrade pip
           black --check src/ tests/ || true
           flake8 src/ tests/ || true
           mypy src/ || true
@@ -93,41 +88,17 @@ jobs:
       - name: Iniciando fase de testes
         run: echo "Iniciando execução de testes unitários em ${{ matrix.os }}"
 
-      - uses: actions/checkout@v4
-
-      - name: Configurar Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Instalar dependências
+      - name: Instalar dependências para testes
         run: |
           echo "Instalando dependências para testes"
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
-      - name: Executar testes (Windows)
-        if: runner.os == 'Windows'
+      - name: Executar testes
         run: |
-          echo "Executando testes no Windows"
+          echo "Executando testes no ${{ matrix.os }}"
           python -m pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
-        continue-on-error: true
-
-      - name: Executar testes (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          echo "Executando testes no macOS"
-          python -m pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
-        continue-on-error: true
-
-      - name: Executar testes (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          echo "Executando testes em sistemas Unix"
-          pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
-        continue-on-error: true
-
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -150,3 +121,16 @@ jobs:
         run: |
           echo "Pipeline executada com sucesso em todos os sistemas operacionais"
           echo "Linting e testes completados"
+          echo "Verificando resultados dos testes"
+          if [ -f "report.xml" ]; then
+            echo "Relatório de testes encontrado"
+            cat report.xml
+          else
+            echo "Relatório de testes não encontrado"
+          fi
+
+      - name: Notificar Conclusão
+        run: |
+          echo "Pipeline concluída com sucesso"
+          echo "Notificando conclusão da pipeline"
+          # Aqui você pode adicionar comandos para enviar notificações, como Slack, email, etc.
