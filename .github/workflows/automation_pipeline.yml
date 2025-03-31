@@ -91,7 +91,7 @@ jobs:
         shell: bash
         run: |
           python -m venv venv
-          if [ "${{ runner.os }}" == "Windows" ]; then
+          if ([ "${{ runner.os }}" == "Windows" ]); then
             source venv/Scripts/activate
           else
             source venv/bin/activate
@@ -100,7 +100,7 @@ jobs:
 
       - name: Executar testes
         run: |
-          if [ "${{ runner.os }}" == "Windows" ]; then
+          if ([ "${{ runner.os }}" == "Windows" ]); then
             .\venv\Scripts\activate
           else
             source venv/bin/activate
