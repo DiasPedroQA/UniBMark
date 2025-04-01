@@ -51,12 +51,13 @@ jobs:
           python --version
           pip --version
 
-      - name: Instalar dependências básicas
+      - name: Instalar dependências
         run: |
-          echo "Instalando dependências básicas"
+          echo "Instalando dependências do projeto"
           python -m pip install --upgrade pip
-          pip freeze > requirements.txt
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
           pip install pytest pytest-cov
 
   lint:
@@ -78,41 +79,52 @@ jobs:
 
   test:
     name: Executar Testes Unitários
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        # os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: ['3.10']
+    runs-on: ubuntu-latest
     needs: setup-python
 
     steps:
       - name: Iniciando fase de testes
-        run: echo "Iniciando execução de testes unitários em ${{ matrix.os }}"
+        run: echo "Iniciando execução de testes unitários"
+
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
       - name: Instalar dependências para testes
         run: |
           echo "Instalando dependências para testes"
           python -m pip install --upgrade pip
-          pip freeze > requirements.txt
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
           pip install pytest pytest-cov
 
-      - name: Listar arquivos
+      - name: Listar arquivos no diretório atual
         run: ls -la
 
-      - name: Verificar arquivos de teste
-        run: ls -R tests/
+      - name: Verificar existência do diretório de testes
+        run: |
+          if [ -d tests ]; then
+            echo "Diretório 'tests' encontrado"
+            ls -R tests/
+          else
+            echo "Diretório 'tests' não encontrado"
+            exit 1
+          fi
 
       - name: Executar testes
         run: |
-          echo "Executando testes no ${{ matrix.os }}"
-          python -m pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
+          echo "Executando testes"
+          pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
 
-      - name: Upload coverage report
+      - name: Upload do relatório de cobertura
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{ runner.os }}
+          name: coverage-report
           path: |
             coverage.xml
             htmlcov/
@@ -128,9 +140,8 @@ jobs:
 
       - name: Verificar Resultados
         run: |
-          echo "Pipeline executada com sucesso em todos os sistemas operacionais"
+          echo "Pipeline executada com sucesso"
           echo "Linting e testes completados"
-          echo "Verificando resultados dos testes"
           if [ -f "report.xml" ]; then
             echo "Relatório de testes encontrado"
             cat report.xml
@@ -141,5 +152,4 @@ jobs:
       - name: Notificar Conclusão
         run: |
           echo "Pipeline concluída com sucesso"
-          echo "Notificando conclusão da pipeline"
           # Aqui você pode adicionar comandos para enviar notificações, como Slack, email, etc.
