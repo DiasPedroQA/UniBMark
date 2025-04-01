@@ -81,8 +81,7 @@ jobs:
   test:
     name: Executar Testes Unitários
     runs-on: ubuntu-latest
-    needs: setup-python
-    if: github.event_name == 'push' && contains(github.event.head_commit.modified, 'src/')
+    needs: lint  # Certificando-se de que os testes só rodem após o linting
 
     steps:
       - name: Verificar dependências e testes
@@ -115,7 +114,7 @@ jobs:
   create-pull-request:
     name: Criar Pull Request para Main
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [lint, test]  # Agora o PR depende tanto do linting quanto dos testes
     if: github.ref == 'refs/heads/develop'
 
     steps:
