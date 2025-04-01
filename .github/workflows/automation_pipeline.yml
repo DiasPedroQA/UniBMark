@@ -18,18 +18,14 @@ jobs:
       python-version: '3.10'
 
     steps:
-      - name: Iniciando fase de checkout
-        run: echo "Iniciando fase de checkout do código"
-
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
       - name: Exibir estrutura do projeto
         run: |
-          echo "Exibindo estrutura do projeto"
+          echo "Estrutura do projeto:"
           pwd
           ls -R
-          echo "Estrutura do projeto verificada"
 
   setup-python:
     name: Configurar Python e Instalar Dependências
@@ -37,23 +33,13 @@ jobs:
     needs: checkout
 
     steps:
-      - name: Iniciando configuração do ambiente Python
-        run: echo "Iniciando configuração do ambiente Python"
-
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ needs.checkout.outputs.python-version }}
 
-      - name: Verificar versões
-        run: |
-          echo "Verificando versões do Python e pip"
-          python --version
-          pip --version
-
       - name: Instalar dependências
         run: |
-          echo "Instalando dependências do projeto"
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
@@ -66,59 +52,37 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Iniciando fase de linting
-        run: echo "Iniciando verificação de código (Linting)"
-
-      - name: Verificar Código (Linting)
+      - name: Verificar Código
         run: |
-          echo "Executando ferramentas de linting"
-          black --check src/ tests/ || true
-          flake8 src/ tests/ || true
-          mypy src/ || true
-          pylint src/ || true
+          black --check src/ tests/
+          flake8 src/ tests/
+          mypy src/
+          pylint src/
 
   test:
     name: Executar Testes Unitários
     runs-on: ubuntu-latest
     needs: setup-python
+    if: github.event_name == 'push' && contains(github.event.head_commit.modified, 'src/')
 
     steps:
-      - name: Iniciando fase de testes
-        run: echo "Iniciando execução de testes unitários"
-
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
-
-      - name: Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Instalar dependências para testes
+      - name: Verificar dependências e testes
         run: |
-          echo "Instalando dependências para testes"
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
           pip install pytest pytest-cov
 
-      - name: Listar arquivos no diretório atual
-        run: ls -la
-
-      - name: Verificar existência do diretório de testes
+      - name: Verificar existência de arquivos de teste
         run: |
-          if [ -d tests ]; then
-            echo "Diretório 'tests' encontrado"
-            ls -R tests/
-          else
-            echo "Diretório 'tests' não encontrado"
+          if [ ! -d tests ]; then
+            echo "Erro: Diretório de testes não encontrado!"
             exit 1
           fi
 
       - name: Executar testes
         run: |
-          echo "Executando testes"
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
 
       - name: Upload do relatório de cobertura
@@ -129,27 +93,51 @@ jobs:
             coverage.xml
             htmlcov/
 
+  create-pull-request:
+    name: Criar Pull Request para Main
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar identidade do Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Criar Pull Request automaticamente
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: develop
+          base: main
+          title: "Merge automático de develop para main"
+          body: "Este PR foi gerado automaticamente após a execução bem-sucedida da pipeline."
+          draft: false
+
   finalize:
     name: Finalizar Pipeline
     runs-on: ubuntu-latest
     needs: [lint, test]
 
     steps:
-      - name: Iniciando fase de finalização
-        run: echo "Iniciando fase de finalização da pipeline"
-
-      - name: Verificar Resultados
+      - name: Verificar arquivos essenciais
         run: |
-          echo "Pipeline executada com sucesso"
-          echo "Linting e testes completados"
+          for file in "README.md" "requirements.txt" "pyproject.toml"; do
+            if [ ! -f "$file" ]; then
+              echo "Erro: $file não encontrado!"
+              exit 1
+            fi
+          done
+
+      - name: Exibir relatório de testes
+        run: |
           if [ -f "report.xml" ]; then
             echo "Relatório de testes encontrado"
             cat report.xml
           else
             echo "Relatório de testes não encontrado"
           fi
-
-      - name: Notificar Conclusão
-        run: |
-          echo "Pipeline concluída com sucesso"
-          # Aqui você pode adicionar comandos para enviar notificações, como Slack, email, etc.
