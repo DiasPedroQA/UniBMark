@@ -98,6 +98,12 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
+      - name: Listar arquivos
+        run: ls -la
+
+      - name: Verificar arquivos de teste
+        run: ls -R tests/
+
       - name: Executar testes
         run: |
           echo "Executando testes no ${{ matrix.os }}"
