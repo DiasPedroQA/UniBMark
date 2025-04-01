@@ -50,16 +50,16 @@ jobs:
     name: Verificar Código (Linting)
     runs-on: ubuntu-latest
     needs: setup-python
-  
+
     steps:
       - name: Iniciando fase de linting
         run: echo "Iniciando verificação de código (Linting)"
-  
+
       - name: Verificar diretórios de código
         run: |
           echo "Verificando estrutura do projeto"
           ls -R  # Exibe todos os diretórios e arquivos para diagnóstico
-  
+
       - name: Verificar se o diretório 'src' existe
         run: |
           if [ -d "src" ]; then
@@ -69,7 +69,7 @@ jobs:
             echo "'src' não encontrado, linting será executado apenas no diretório 'tests'"
             lint_dirs="tests"
           fi
-  
+
       - name: Verificar Código (Linting)
         run: |
           echo "Executando ferramentas de linting nos diretórios: $lint_dirs"
@@ -77,7 +77,6 @@ jobs:
           flake8 $lint_dirs || true
           mypy $lint_dirs || true
           pylint $lint_dirs || true
-
 
   test:
     name: Executar Testes Unitários
