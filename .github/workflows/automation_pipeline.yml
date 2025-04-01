@@ -54,6 +54,7 @@ jobs:
     steps:
       - name: Verificar Código
         run: |
+          pip install black flake8 mypy pylint
           black --check src/ tests/
           flake8 src/ tests/
           mypy src/
