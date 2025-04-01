@@ -52,13 +52,31 @@ jobs:
     needs: setup-python
 
     steps:
-      - name: Verificar Código
+      - name: Iniciando fase de linting
+        run: echo "Iniciando verificação de código (Linting)"
+
+      - name: Verificar diretórios de código
         run: |
-          pip install black flake8 mypy pylint
+          echo "Verificando estrutura do projeto"
+          ls -R  # Exibe todos os diretórios e arquivos para diagnóstico
+
+      - name: Verificar se o diretório 'src' existe
+        run: |
+          if [ -d "src" ]; then
+            echo "'src' encontrado, executando linting"
+          else
+            echo "'src' não encontrado, abortando linting"
+            exit 1  # Se o diretório não existir, aborta o processo
+          fi
+
+      - name: Verificar Código (Linting)
+        run: |
+          echo "Executando ferramentas de linting"
           black --check src/ tests/
           flake8 src/ tests/
           mypy src/
           pylint src/
+
 
   test:
     name: Executar Testes Unitários
