@@ -81,33 +81,44 @@ jobs:
   test:
     name: Executar Testes Unitários
     runs-on: ubuntu-latest
-    needs: lint  # Certificando-se de que os testes só rodem após o linting
+    needs: setup-python
 
     steps:
-      - name: Verificar dependências e testes
+      - name: Iniciando fase de testes
+        run: echo "Iniciando execução de testes unitários"
+
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências para testes
         run: |
+          echo "Instalando dependências para testes"
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
           pip install pytest pytest-cov
+      - name: Listar arquivos no diretório atual
+        run: ls -la
 
-      - name: Verificar estrutura do repositório
+      - name: Verificar existência do diretório de testes
         run: |
-          echo "Estrutura do repositório:"
-          ls -R  # Exibe todos os arquivos e diretórios para diagnóstico
-
-      - name: Verificar existência de arquivos de teste
-        run: |
-          if [ ! -d tests ]; then
-            echo "Erro: Diretório de testes não encontrado!"
+          if [ -d tests ]; then
+            echo "Diretório 'tests' encontrado"
+            ls -R tests/
+          else
+            echo "Diretório 'tests' não encontrado"
             exit 1
           fi
-
       - name: Executar testes
         run: |
+          echo "Executando testes"
           pytest tests/ --junitxml=report.xml --cov=src --cov-report=xml --cov-report=html
-
       - name: Upload do relatório de cobertura
         uses: actions/upload-artifact@v4
         with:
